@@ -1,18 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
   Circle,
   CircleMarker,
   useMap,
-} from 'react-leaflet';
-import styles from './map.module.scss';
-import 'leaflet/dist/leaflet.css';
-import * as XLSX from 'xlsx';
-import {
-  Modal, Button, Input, Form,
-} from 'antd';
-import { saveAs } from 'file-saver';
+} from 'react-leaflet'
+import styles from './map.module.scss'
+import 'leaflet/dist/leaflet.css'
+import * as XLSX from 'xlsx'
+import { Modal, Button, Input, Form } from 'antd'
+import { saveAs } from 'file-saver'
 
 interface CircleData {
   lat: number
@@ -42,63 +40,100 @@ interface ExcelData {
 }
 
 const Map: React.FC = () => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [circles, setCircles] = useState<CircleData[]>([]);
-  const [minGMV, setMinGMV] = useState<number>(Infinity);
-  const [maxGMV, setMaxGMV] = useState<number>(-Infinity);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
+  const [circles, setCircles] = useState<CircleData[]>([])
+  const [minGMV, setMinGMV] = useState<number>(Infinity)
+  const [maxGMV, setMaxGMV] = useState<number>(-Infinity)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false)
   const [circleForm, setCircleForm] = useState<CircleForm>({
     lat: '',
     lng: '',
     radius: '',
     gmv: '',
-  });
+  })
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     52.229675, 21.01223,
-  ]);
+  ])
+
+  const [editingCircle, setEditingCircle] = useState<CircleData | null>(null)
+  const [editingCircleIndex, setEditingCircleIndex] = useState<number | null>(
+    null
+  )
+  const [editingForm, setEditingForm] = useState<CircleForm>({
+    lat: '',
+    lng: '',
+    radius: '',
+    gmv: '',
+  })
+
+  const handleUpdateCircle = () => {
+    if (editingCircleIndex !== null && editingCircle) {
+      const newCircles = [...circles]
+      newCircles[editingCircleIndex] = editingCircle
+      setCircles(newCircles)
+      setEditingCircle(null)
+      setEditingCircleIndex(null)
+    }
+  }
+
+  const handleEditingInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    if (editingCircle) {
+      setEditingCircle({ ...editingCircle, [name]: parseFloat(value) })
+    }
+  }
+
+  const handleEditCircle = (index: number) => {
+    setEditingCircle(circles[index])
+    setEditingCircleIndex(index)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    if (editingCircleIndex !== null) {
+      setEditingForm({ ...editingForm, [name]: value })
+    } else {
+      setCircleForm({ ...circleForm, [name]: value })
+    }
+  }
 
   const exportCircles = () => {
     const blob = new Blob([JSON.stringify(circles)], {
       type: 'text/plain;charset=utf-8',
-    });
-    saveAs(blob, 'circles.json');
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCircleForm({ ...circleForm, [name]: value });
-  };
+    })
+    saveAs(blob, 'circles.json')
+  }
 
   function ChangeView({ center }: { center: [number, number] }) {
-    const map = useMap();
-    map.setView(center);
-    return null;
+    const map = useMap()
+    map.setView(center)
+    return null
   }
 
   const importCircles = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
-          const text = e.target?.result;
+          const text = e.target?.result
           if (typeof text === 'string') {
-            const importedCircles: CircleData[] = JSON.parse(text);
-            setCircles(importedCircles);
+            const importedCircles: CircleData[] = JSON.parse(text)
+            setCircles(importedCircles)
 
-            const gmvValues = importedCircles.map((circle) => circle.gmv);
-            setMinGMV(Math.min(...gmvValues));
-            setMaxGMV(Math.max(...gmvValues));
+            const gmvValues = importedCircles.map(circle => circle.gmv)
+            setMinGMV(Math.min(...gmvValues))
+            setMaxGMV(Math.max(...gmvValues))
           }
         } catch (error) {
-          console.error('Wystąpił błąd podczas importowania okręgów', error);
+          console.error('Wystąpił błąd podczas importowania okręgów', error)
         }
-      };
-      reader.readAsText(file);
+      }
+      reader.readAsText(file)
     }
-  };
+  }
 
   const handleAddCircle = () => {
     const newCircle = {
@@ -106,86 +141,86 @@ const Map: React.FC = () => {
       lng: parseFloat(circleForm.lng),
       radius: parseFloat(circleForm.radius) * 1000, // Konwersja km na metry
       gmv: parseFloat(circleForm.gmv),
-    };
+    }
 
-    setCircles([...circles, newCircle]);
-    setMapCenter([newCircle.lat, newCircle.lng]);
+    setCircles([...circles, newCircle])
+    setMapCenter([newCircle.lat, newCircle.lng])
 
-    const gmvValues = circles.map((circle) => circle.gmv);
-    setMinGMV(Math.min(newCircle.gmv, ...gmvValues));
-    setMaxGMV(Math.max(newCircle.gmv, ...gmvValues));
-    setIsModalOpen(false);
+    const gmvValues = circles.map(circle => circle.gmv)
+    setMinGMV(Math.min(newCircle.gmv, ...gmvValues))
+    setMaxGMV(Math.max(newCircle.gmv, ...gmvValues))
+    setIsModalOpen(false)
     setCircleForm({
       lat: '',
       lng: '',
       radius: '',
       gmv: '',
-    });
-  };
+    })
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
+    const file = e.target.files ? e.target.files[0] : null
 
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (e: any) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = new Uint8Array(e.target.result)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
           raw: false,
-        });
+        })
 
-        const formattedData: CircleData[] = json.map((item) => {
-          const gmv = parseFloat(item.GMV);
+        const formattedData: CircleData[] = json.map(item => {
+          const gmv = parseFloat(item.GMV)
           return {
             lat: parseFloat(item.Latitude),
             lng: parseFloat(item.Longitude),
             radius: parseFloat(item['Bubble radius (km)']) * 1000, // Konwersja km na metry
             gmv: isNaN(gmv) ? 0 : gmv,
-          };
-        });
+          }
+        })
 
-        const gmvValues = formattedData.map((item) => item.gmv);
-        const minVal = Math.min(...gmvValues);
-        const maxVal = Math.max(...gmvValues);
+        const gmvValues = formattedData.map(item => item.gmv)
+        const minVal = Math.min(...gmvValues)
+        const maxVal = Math.max(...gmvValues)
 
-        setMinGMV(minVal);
-        setMaxGMV(maxVal);
-        setCircles(formattedData);
-      };
-      reader.readAsArrayBuffer(file);
+        setMinGMV(minVal)
+        setMaxGMV(maxVal)
+        setCircles(formattedData)
+      }
+      reader.readAsArrayBuffer(file)
     }
-  };
+  }
 
   const centerMapOnCircle = (circle: CircleData) => {
-    setMapCenter([circle.lat, circle.lng]);
-  };
+    setMapCenter([circle.lat, circle.lng])
+  }
 
   const getColorFromGMV = (gmv: number, minGMV: number, maxGMV: number) => {
     if (maxGMV === minGMV) {
-      return 'rgb(0, 0, 255)';
+      return 'rgb(0, 0, 255)'
     }
-    const ratio = (gmv - minGMV) / (maxGMV - minGMV);
-    const red = Math.min(255, Math.floor(255 * ratio));
-    const blue = 255 - red;
-    return `rgb(${red}, 0, ${blue})`;
-  };
+    const ratio = (gmv - minGMV) / (maxGMV - minGMV)
+    const red = Math.min(255, Math.floor(255 * ratio))
+    const blue = 255 - red
+    return `rgb(${red}, 0, ${blue})`
+  }
 
   const handleRemoveCircle = (index: number) => {
-    const newCircles = [...circles];
-    newCircles.splice(index, 1);
-    setCircles(newCircles);
+    const newCircles = [...circles]
+    newCircles.splice(index, 1)
+    setCircles(newCircles)
 
     if (newCircles.length > 0) {
-      const gmvValues = newCircles.map((circle) => circle.gmv);
-      setMinGMV(Math.min(...gmvValues));
-      setMaxGMV(Math.max(...gmvValues));
+      const gmvValues = newCircles.map(circle => circle.gmv)
+      setMinGMV(Math.min(...gmvValues))
+      setMaxGMV(Math.max(...gmvValues))
     } else {
-      setMinGMV(Infinity);
-      setMaxGMV(-Infinity);
+      setMinGMV(Infinity)
+      setMaxGMV(-Infinity)
     }
-  };
+  }
 
   return (
     <div className={styles.mapContainer}>
@@ -197,7 +232,7 @@ const Map: React.FC = () => {
         <ChangeView center={mapCenter} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {circles.map((circle, idx) => {
-          const circleColor = getColorFromGMV(circle.gmv, minGMV, maxGMV);
+          const circleColor = getColorFromGMV(circle.gmv, minGMV, maxGMV)
           return (
             <React.Fragment key={idx}>
               <Circle
@@ -211,7 +246,7 @@ const Map: React.FC = () => {
                 pathOptions={{ color: circleColor }}
               />
             </React.Fragment>
-          );
+          )
         })}
       </MapContainer>
       <div className={styles.bottomContainer}>
@@ -224,17 +259,12 @@ const Map: React.FC = () => {
         <label htmlFor="file-upload" className={styles.fileInput}>
           Wybierz plik
         </label>
-        <Button type="primary" onClick={() => setIsModalOpen(true)}>
-          Dodaj okrąg
-        </Button>
+        <Button onClick={() => setIsModalOpen(true)}>Dodaj okrąg</Button>
         <Button onClick={() => setIsInfoModalOpen(true)}>
           Pokaż informacje o okręgach
         </Button>
 
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          className={styles.importButton}
-        >
+        <Button onClick={() => fileInputRef.current?.click()}>
           Importuj Okręgi
         </Button>
         <input
@@ -244,9 +274,7 @@ const Map: React.FC = () => {
           onChange={importCircles}
           accept=".json"
         />
-        <Button onClick={exportCircles} className={styles.importButton}>
-          Eksportuj Okręgi
-        </Button>
+        <Button onClick={exportCircles}>Eksportuj Okręgi</Button>
       </div>
       <Modal
         title="Dodaj okrąg"
@@ -307,18 +335,24 @@ const Map: React.FC = () => {
               </p>
               <p>
                 Radius:
-                {circle.radius / 1000}
-                {' '}
-                km
+                {circle.radius / 1000} km
               </p>
               <p>
                 GMV:
                 {circle.gmv}
               </p>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveCircle(index);
+                onClick={e => {
+                  e.stopPropagation()
+                  handleEditCircle(index)
+                }}
+              >
+                Edytuj
+              </button>
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  handleRemoveCircle(index)
                 }}
               >
                 Usuń
@@ -326,9 +360,50 @@ const Map: React.FC = () => {
             </li>
           ))}
         </ul>
+        {editingCircle && (
+          <div>
+            <h3>Edycja okręgu</h3>
+            <Form layout="vertical">
+              <Form.Item label="Szerokość geograficzna:">
+                <Input
+                  name="lat"
+                  value={editingCircle.lat}
+                  onChange={handleEditingInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="Długość geograficzna:">
+                <Input
+                  name="lng"
+                  value={editingCircle.lng}
+                  onChange={handleEditingInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="Promień (w km):">
+                <Input
+                  name="radius"
+                  value={editingCircle.radius / 1000} // Konwersja metrów na kilometry
+                  onChange={handleEditingInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="GMV:">
+                <Input
+                  name="gmv"
+                  value={editingCircle.gmv}
+                  onChange={handleEditingInputChange}
+                />
+              </Form.Item>
+              <Button type="primary" onClick={handleUpdateCircle}>
+                Zaktualizuj
+              </Button>
+              <Button type="primary" onClick={() => setEditingCircle(null)}>
+                Zamknij
+              </Button>
+            </Form>
+          </div>
+        )}
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default Map;
+export default Map
