@@ -3,6 +3,7 @@ export interface CircleData {
   lng: number
   radius: number
   gmv: number
+  bubble: boolean
 }
 
 export interface CircleForm {
@@ -10,6 +11,7 @@ export interface CircleForm {
   lng: string
   radius: string
   gmv: string
+  bubble: boolean
 }
 
 export interface ExcelData {
@@ -17,4 +19,5 @@ export interface ExcelData {
   Longitude: string
   'Bubble radius (km)': string
   GMV: string
+  Bubble: 'Yes' | 'No'
 }

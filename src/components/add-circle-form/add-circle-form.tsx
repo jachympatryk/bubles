@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Form, Input } from 'antd'
+import { Button, Checkbox, Form, Input } from 'antd'
 import { AddCircleFormProps } from './add-circle-form.types'
 import styles from './add-circle-form.module.scss'
 export const AddCircleForm: React.FC<AddCircleFormProps> = ({
@@ -14,6 +14,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         lng: '',
         radius: '',
         gmv: '',
+        bubble: false,
       }}
       className={styles.container}
     >
@@ -85,6 +86,9 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         ]}
       >
         <Input type="number" />
+      </Form.Item>
+      <Form.Item label="Pokazuj okrąg:" name="bubble" valuePropName="checked">
+        <Checkbox />
       </Form.Item>
       <Button type="primary" htmlType="submit">
         Dodaj

@@ -79,11 +79,13 @@ const Map: React.FC = () => {
   }
 
   const handleAddCircle = (values: CircleForm) => {
-    const newCircle = {
+    console.log(values)
+    const newCircle: CircleData = {
       lat: parseFloat(values.lat),
       lng: parseFloat(values.lng),
-      radius: parseFloat(values.radius) * 1000, // Konwersja km na metry
+      radius: parseFloat(values.radius) * 1000,
       gmv: parseFloat(values.gmv),
+      bubble: values.bubble,
     }
 
     setCircles([...circles, newCircle])
@@ -110,12 +112,15 @@ const Map: React.FC = () => {
           })
 
           const formattedData: CircleData[] = json.map(item => {
+            const bubbleValue = item.Bubble === 'Yes'
+
             const gmv = parseFloat(item.GMV)
             return {
               lat: parseFloat(item.Latitude),
               lng: parseFloat(item.Longitude),
               radius: parseFloat(item['Bubble radius (km)']) * 1000, // Konwersja km na metry
               gmv: isNaN(gmv) ? 0 : gmv,
+              bubble: bubbleValue,
             }
           })
 
@@ -187,6 +192,8 @@ const Map: React.FC = () => {
         <ChangeView center={mapCenter} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {circles.map((circle, idx) => {
+          if (!circle.bubble) return
+
           const circleColor = getColorFromGMV(circle.gmv, minGMV, maxGMV)
           return (
             <React.Fragment key={idx}>

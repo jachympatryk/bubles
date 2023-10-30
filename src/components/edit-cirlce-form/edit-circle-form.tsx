@@ -10,7 +10,9 @@ export const EditCircleForm: React.FC<EditCircleFormProps> = ({
 }) => {
   const [editedCircle, setEditedCircle] = useState<CircleData>(circle)
 
-  const handleChange = (field: string, value: number) => {
+  console.log(editedCircle)
+
+  const handleChange = (field: string, value: number | boolean) => {
     setEditedCircle({
       ...editedCircle,
       [field]: value,
@@ -54,6 +56,15 @@ export const EditCircleForm: React.FC<EditCircleFormProps> = ({
           type="number"
           value={editedCircle.gmv}
           onChange={e => handleChange('gmv', parseFloat(e.target.value))}
+        />
+      </label>
+      <label className={styles.checkboxLabel}>
+        Pokaż okrąg:
+        <input
+          className={styles.checkbox}
+          type="checkbox"
+          checked={editedCircle.bubble}
+          onChange={e => handleChange('bubble', e.target.checked)}
         />
       </label>
       <div className={styles.buttons}>
