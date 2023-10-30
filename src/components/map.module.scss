@@ -39,6 +39,8 @@
 .infoList {
   list-style-type: none;
   padding: 0;
+  max-height: 50vh;
+  overflow-y: auto;
 
   li {
     padding: 10px;
