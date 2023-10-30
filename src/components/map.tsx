@@ -29,6 +29,12 @@ const Map: React.FC = () => {
     52.229675, 21.01223,
   ])
 
+  const handleEditCircle = (editedCircle: CircleData, index: number) => {
+    const newCircles = [...circles]
+    newCircles[index] = editedCircle
+    setCircles(newCircles)
+  }
+
   const exportCircles = () => {
     const blob = new Blob([JSON.stringify(circles)], {
       type: 'text/plain;charset=utf-8',
@@ -226,6 +232,7 @@ const Map: React.FC = () => {
         footer={null}
       >
         <CirclesList
+          handleEditCircle={handleEditCircle}
           circles={circles}
           handleRemoveCircle={handleRemoveCircle}
           centerMapOnCircle={centerMapOnCircle}
