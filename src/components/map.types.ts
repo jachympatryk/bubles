@@ -11,3 +11,10 @@ export interface CircleForm {
   radius: string
   gmv: string
 }
+
+export interface ExcelData {
+  Latitude: string
+  Longitude: string
+  'Bubble radius (km)': string
+  GMV: string
+}

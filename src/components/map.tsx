@@ -12,16 +12,9 @@ import * as XLSX from 'xlsx'
 import { Modal } from 'antd'
 import { saveAs } from 'file-saver'
 import { CirclesList } from './circles-list/circles-list'
-import { CircleData, CircleForm } from './map.types'
+import { CircleData, CircleForm, ExcelData } from './map.types'
 import { AddCircleForm } from './add-circle-form/add-circle-form'
 import { Buttons } from './buttons/buttons'
-
-interface ExcelData {
-  Latitude: string
-  Longitude: string
-  'Bubble radius (km)': string
-  GMV: string
-}
 
 const Map: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
