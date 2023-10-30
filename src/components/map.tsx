@@ -9,28 +9,12 @@ import {
 import styles from './map.module.scss'
 import 'leaflet/dist/leaflet.css'
 import * as XLSX from 'xlsx'
-import { Modal, Button, Input, Form } from 'antd'
+import { Modal } from 'antd'
 import { saveAs } from 'file-saver'
-
-interface CircleData {
-  lat: number
-  lng: number
-  radius: number
-  gmv: number
-}
-
-interface CircleForm {
-  lat: string
-  lng: string
-  radius: string
-  gmv: string
-}
-interface CircleData {
-  lat: number
-  lng: number
-  radius: number
-  gmv: number
-}
+import { CirclesList } from './circles-list/circles-list'
+import { CircleData, CircleForm } from './map.types'
+import { AddCircleForm } from './add-circle-form/add-circle-form'
+import { Buttons } from './buttons/buttons'
 
 interface ExcelData {
   Latitude: string
@@ -221,39 +205,17 @@ const Map: React.FC = () => {
           )
         })}
       </MapContainer>
-      <div className={styles.bottomContainer}>
-        <input
-          id="file-upload"
-          type="file"
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-          ref={fileInputExcelRef}
-        />
-        <label htmlFor="file-upload" className={styles.fileInput}>
-          Wybierz plik
-        </label>
-        <Button onClick={() => setIsModalOpen(true)}>Dodaj okrąg</Button>
-        <Button
-          disabled={circles.length === 0}
-          onClick={() => setIsInfoModalOpen(true)}
-        >
-          Pokaż informacje o okręgach
-        </Button>
 
-        <Button onClick={() => fileInputRef.current?.click()}>
-          Importuj Okręgi
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          style={{ display: 'none' }}
-          onChange={importCircles}
-          accept=".json"
-        />
-        <Button disabled={circles.length === 0} onClick={exportCircles}>
-          Eksportuj Okręgi
-        </Button>
-      </div>
+      <Buttons
+        circles={circles}
+        importCircles={importCircles}
+        fileInputExcelRef={fileInputExcelRef}
+        fileInputRef={fileInputRef}
+        handleFileUpload={handleFileUpload}
+        setIsInfoModalOpen={setIsInfoModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        exportCircles={exportCircles}
+      />
 
       <Modal
         title="Dodaj okrąg"
@@ -261,89 +223,7 @@ const Map: React.FC = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={null}
       >
-        <Form
-          layout="vertical"
-          onFinish={handleAddCircle}
-          initialValues={{
-            lat: '',
-            lng: '',
-            radius: '',
-            gmv: '',
-          }}
-        >
-          <Form.Item
-            label="Szerokość geograficzna:"
-            name="lat"
-            rules={[
-              {
-                required: true,
-                message: 'Proszę wprowadzić szerokość geograficzną!',
-              },
-              {
-                type: 'number',
-                message: 'Proszę wprowadzić poprawną liczbę!',
-                transform: value => parseFloat(value),
-              },
-            ]}
-          >
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item
-            label="Długość geograficzna:"
-            name="lng"
-            rules={[
-              {
-                required: true,
-                message: 'Proszę wprowadzić długość geograficzną!',
-              },
-              {
-                type: 'number',
-                message: 'Proszę wprowadzić poprawną liczbę!',
-                transform: value => parseFloat(value),
-              },
-            ]}
-          >
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item
-            label="Promień (w km):"
-            name="radius"
-            rules={[
-              {
-                required: true,
-                message: 'Proszę wprowadzić promień!',
-              },
-              {
-                type: 'number',
-                message: 'Proszę wprowadzić liczbę dodatnią!',
-                transform: value => parseFloat(value),
-                min: 0,
-              },
-            ]}
-          >
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item
-            label="GMV:"
-            name="gmv"
-            rules={[
-              {
-                required: true,
-                message: 'Proszę wprowadzić GMV!',
-              },
-              {
-                type: 'number',
-                message: 'Proszę wprowadzić poprawną liczbę!',
-                transform: value => parseFloat(value),
-              },
-            ]}
-          >
-            <Input type="number" />
-          </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Dodaj
-          </Button>
-        </Form>
+        <AddCircleForm handleAddCircle={handleAddCircle} />
       </Modal>
 
       <Modal
@@ -352,36 +232,11 @@ const Map: React.FC = () => {
         onCancel={() => setIsInfoModalOpen(false)}
         footer={null}
       >
-        <ul className={styles.infoList}>
-          {circles.map((circle, index) => (
-            <li key={index} onClick={() => centerMapOnCircle(circle)}>
-              <p>
-                Latitude:
-                {circle.lat}
-              </p>
-              <p>
-                Longitude:
-                {circle.lng}
-              </p>
-              <p>
-                Radius:
-                {circle.radius / 1000} km
-              </p>
-              <p>
-                GMV:
-                {circle.gmv}
-              </p>
-              <button
-                onClick={e => {
-                  e.stopPropagation()
-                  handleRemoveCircle(index)
-                }}
-              >
-                Usuń
-              </button>
-            </li>
-          ))}
-        </ul>
+        <CirclesList
+          circles={circles}
+          handleRemoveCircle={handleRemoveCircle}
+          centerMapOnCircle={centerMapOnCircle}
+        />
       </Modal>
     </div>
   )

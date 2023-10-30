@@ -4,16 +4,6 @@
   height: 100vh;
 }
 
-.bottomContainer {
-  display: flex;
-  background-color: #fff;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 10px;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  gap: 4px;
-}
-
 .fileInput,
 .importButton,
 .ant-btn-primary {
@@ -32,43 +22,6 @@
 
   &:hover {
     background-color: #40a9ff;
-  }
-}
-
-
-.infoList {
-  list-style-type: none;
-  padding: 0;
-  max-height: 50vh;
-  overflow-y: auto;
-
-  li {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: #fafafa;
-    }
-
-    p {
-      margin: 5px 0;
-    }
-
-    button {
-      background-color: #ff4d4f;
-      color: #fff;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: #ff7875;
-      }
-    }
   }
 }
 
