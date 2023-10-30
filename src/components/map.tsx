@@ -9,7 +9,9 @@ import {
 import styles from './map.module.scss';
 import 'leaflet/dist/leaflet.css';
 import * as XLSX from 'xlsx';
-import { Modal, Button, Input, Form } from 'antd';
+import {
+  Modal, Button, Input, Form,
+} from 'antd';
 import { saveAs } from 'file-saver';
 
 interface CircleData {
@@ -69,11 +71,11 @@ const Map: React.FC = () => {
     setCircleForm({ ...circleForm, [name]: value });
   };
 
-  const ChangeView = ({ center }: { center: [number, number] }) => {
+  function ChangeView({ center }: { center: [number, number] }) {
     const map = useMap();
     map.setView(center);
     return null;
-  };
+  }
 
   const importCircles = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,7 +88,7 @@ const Map: React.FC = () => {
             const importedCircles: CircleData[] = JSON.parse(text);
             setCircles(importedCircles);
 
-            const gmvValues = importedCircles.map(circle => circle.gmv);
+            const gmvValues = importedCircles.map((circle) => circle.gmv);
             setMinGMV(Math.min(...gmvValues));
             setMaxGMV(Math.max(...gmvValues));
           }
@@ -109,11 +111,16 @@ const Map: React.FC = () => {
     setCircles([...circles, newCircle]);
     setMapCenter([newCircle.lat, newCircle.lng]);
 
-    const gmvValues = circles.map(circle => circle.gmv);
+    const gmvValues = circles.map((circle) => circle.gmv);
     setMinGMV(Math.min(newCircle.gmv, ...gmvValues));
     setMaxGMV(Math.max(newCircle.gmv, ...gmvValues));
     setIsModalOpen(false);
-    setCircleForm({ lat: '', lng: '', radius: '', gmv: '' });
+    setCircleForm({
+      lat: '',
+      lng: '',
+      radius: '',
+      gmv: '',
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +136,7 @@ const Map: React.FC = () => {
           raw: false,
         });
 
-        const formattedData: CircleData[] = json.map(item => {
+        const formattedData: CircleData[] = json.map((item) => {
           const gmv = parseFloat(item.GMV);
           return {
             lat: parseFloat(item.Latitude),
@@ -139,7 +146,7 @@ const Map: React.FC = () => {
           };
         });
 
-        const gmvValues = formattedData.map(item => item.gmv);
+        const gmvValues = formattedData.map((item) => item.gmv);
         const minVal = Math.min(...gmvValues);
         const maxVal = Math.max(...gmvValues);
 
@@ -171,7 +178,7 @@ const Map: React.FC = () => {
     setCircles(newCircles);
 
     if (newCircles.length > 0) {
-      const gmvValues = newCircles.map(circle => circle.gmv);
+      const gmvValues = newCircles.map((circle) => circle.gmv);
       setMinGMV(Math.min(...gmvValues));
       setMaxGMV(Math.max(...gmvValues));
     } else {
@@ -290,12 +297,26 @@ const Map: React.FC = () => {
         <ul className={styles.infoList}>
           {circles.map((circle, index) => (
             <li key={index} onClick={() => centerMapOnCircle(circle)}>
-              <p>Latitude: {circle.lat}</p>
-              <p>Longitude: {circle.lng}</p>
-              <p>Radius: {circle.radius / 1000} km</p>
-              <p>GMV: {circle.gmv}</p>
+              <p>
+                Latitude:
+                {circle.lat}
+              </p>
+              <p>
+                Longitude:
+                {circle.lng}
+              </p>
+              <p>
+                Radius:
+                {circle.radius / 1000}
+                {' '}
+                km
+              </p>
+              <p>
+                GMV:
+                {circle.gmv}
+              </p>
               <button
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   handleRemoveCircle(index);
                 }}
