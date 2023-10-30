@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Form, Input } from 'antd'
 import { AddCircleFormProps } from './add-circle-form.types'
-
+import styles from './add-circle-form.module.scss'
 export const AddCircleForm: React.FC<AddCircleFormProps> = ({
   handleAddCircle,
 }) => {
@@ -15,6 +15,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         radius: '',
         gmv: '',
       }}
+      className={styles.container}
     >
       <Form.Item
         label="Szerokość geograficzna:"

@@ -1,0 +1,19 @@
+.container {
+  max-height: 50vh;
+  overflow-y: auto;
+  margin: 0 auto;
+
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+
+  .ant-input-number {
+    width: 100%;
+  }
+
+  .ant-btn-primary {
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+  }
+}
