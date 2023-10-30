@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -16,6 +16,8 @@ import { CircleData, CircleForm, ExcelData } from './map.types'
 import { AddCircleForm } from './add-circle-form/add-circle-form'
 import { Buttons } from './buttons/buttons'
 import DataAnalysis from './data-analysis/data-analysis'
+import { useTheme } from '../providers/theme-provider.provider'
+import { ThemeToggleButton } from './theme-toggle-button/theme-toggle-button'
 
 const Map: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,6 +32,8 @@ const Map: React.FC = () => {
     52.229675, 21.01223,
   ])
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
+
+  const { theme } = useTheme()
 
   const handleEditCircle = (editedCircle: CircleData, index: number) => {
     const newCircles = [...circles]
@@ -153,6 +157,11 @@ const Map: React.FC = () => {
     setMapCenter([circle.lat, circle.lng])
   }
 
+  const tileUrl =
+    theme === 'light'
+      ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' // Jasny motyw
+      : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' // Ciemny motyw
+
   const getColorFromGMV = (gmv: number, minGMV: number, maxGMV: number) => {
     if (maxGMV === minGMV) {
       return 'rgb(0, 0, 255)'
@@ -197,13 +206,15 @@ const Map: React.FC = () => {
 
   return (
     <div className={styles.mapContainer}>
+      <ThemeToggleButton />
+
       <MapContainer
         center={mapCenter}
         zoom={10}
         style={{ height: '100%', width: '100%' }}
       >
         <ChangeView center={mapCenter} />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer url={tileUrl} />
         {circles.map((circle, idx) => {
           if (!circle.bubble) return
 

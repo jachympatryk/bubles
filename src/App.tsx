@@ -1,11 +1,14 @@
 import React from 'react'
 import './App.css'
 import Map from './components/map'
+import { ThemeProvider } from './providers/theme-provider.provider'
 
 function App() {
   return (
     <div className="App">
-      <Map />
+      <ThemeProvider>
+        <Map />
+      </ThemeProvider>
     </div>
   )
 }
