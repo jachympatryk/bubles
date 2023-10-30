@@ -10,4 +10,5 @@ export type ButtonsProps = {
   fileInputRef: React.RefObject<HTMLInputElement>
   importCircles: (event: React.ChangeEvent<HTMLInputElement>) => void
   exportCircles: () => void
+  setIsDataModal: React.Dispatch<React.SetStateAction<boolean>>
 }

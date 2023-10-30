@@ -15,6 +15,7 @@ import { CirclesList } from './circles-list/circles-list'
 import { CircleData, CircleForm, ExcelData } from './map.types'
 import { AddCircleForm } from './add-circle-form/add-circle-form'
 import { Buttons } from './buttons/buttons'
+import DataAnalysis from './data-analysis/data-analysis'
 
 const Map: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -28,6 +29,7 @@ const Map: React.FC = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     52.229675, 21.01223,
   ])
+  const [isDataModal, setIsDataModal] = useState<boolean>(false)
 
   const handleEditCircle = (editedCircle: CircleData, index: number) => {
     const newCircles = [...circles]
@@ -221,6 +223,7 @@ const Map: React.FC = () => {
         setIsInfoModalOpen={setIsInfoModalOpen}
         setIsModalOpen={setIsModalOpen}
         exportCircles={exportCircles}
+        setIsDataModal={setIsDataModal}
       />
 
       <Modal
@@ -244,6 +247,14 @@ const Map: React.FC = () => {
           handleRemoveCircle={handleRemoveCircle}
           centerMapOnCircle={centerMapOnCircle}
         />
+      </Modal>
+      <Modal
+        title="Informacje o okręgach"
+        visible={isDataModal}
+        onCancel={() => setIsDataModal(false)}
+        footer={null}
+      >
+        <DataAnalysis circles={circles} />
       </Modal>
     </div>
   )

@@ -12,6 +12,7 @@ export const Buttons: React.FC<ButtonsProps> = ({
   circles,
   importCircles,
   exportCircles,
+  setIsDataModal,
 }) => {
   return (
     <div className={styles.bottomContainer}>
@@ -31,6 +32,13 @@ export const Buttons: React.FC<ButtonsProps> = ({
         onClick={() => setIsInfoModalOpen(true)}
       >
         Pokaż informacje o okręgach
+      </Button>
+
+      <Button
+        disabled={circles.length === 0}
+        onClick={() => setIsDataModal(true)}
+      >
+        Pokaż dane
       </Button>
 
       <Button onClick={() => fileInputRef.current?.click()}>
