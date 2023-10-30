@@ -153,7 +153,6 @@ const Map: React.FC = () => {
   }
 
   const centerMapOnCircle = (circle: CircleData) => {
-    console.log(circle)
     setMapCenter([circle.lat, circle.lng])
   }
 
@@ -181,8 +180,6 @@ const Map: React.FC = () => {
       setMaxGMV(-Infinity)
     }
   }
-
-  console.log(mapCenter)
 
   return (
     <div className={styles.mapContainer}>
