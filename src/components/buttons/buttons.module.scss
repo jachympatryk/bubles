@@ -7,3 +7,24 @@
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   gap: 4px;
 }
+
+.fileInput,
+.importButton,
+.ant-btn-primary {
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 12px;
+  margin-right: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    background-color: #40a9ff;
+  }
+}

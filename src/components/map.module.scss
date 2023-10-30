@@ -4,26 +4,6 @@
   height: 100vh;
 }
 
-.fileInput,
-.importButton,
-.ant-btn-primary {
-  background-color: #1890ff;
-  color: #fff;
-  border: none;
-  padding: 5px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: 12px;
-  margin-right: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  &:hover {
-    background-color: #40a9ff;
-  }
-}
 
 .ant-modal-footer {
   display: none;
