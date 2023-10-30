@@ -1,5 +1,6 @@
-import { CircleForm } from '../map.types'
+import { CircleData, CircleForm } from '../map.types'
 
 export type AddCircleFormProps = {
   handleAddCircle: (values: CircleForm) => void
+  initialValues: CircleData | null
 }

@@ -12,12 +12,33 @@ import * as XLSX from 'xlsx'
 import { Modal } from 'antd'
 import { saveAs } from 'file-saver'
 import { CirclesList } from './circles-list/circles-list'
-import { CircleData, CircleForm, ExcelData } from './map.types'
+import {
+  CircleData,
+  CircleForm,
+  ExcelData,
+  MapEventHandlerProps,
+} from './map.types'
 import { AddCircleForm } from './add-circle-form/add-circle-form'
 import { Buttons } from './buttons/buttons'
 import DataAnalysis from './data-analysis/data-analysis'
 import { useTheme } from '../providers/theme-provider.provider'
 import { ThemeToggleButton } from './theme-toggle-button/theme-toggle-button'
+
+const MapEventHandler: React.FC<MapEventHandlerProps> = ({
+  handleMapClick,
+}) => {
+  const map = useMap()
+
+  useEffect(() => {
+    map.on('click', handleMapClick)
+
+    return () => {
+      map.off('click', handleMapClick)
+    }
+  }, [map, handleMapClick])
+
+  return null
+}
 
 const Map: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -32,8 +53,15 @@ const Map: React.FC = () => {
     52.229675, 21.01223,
   ])
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
+  const [tempCircle, setTempCircle] = useState<CircleData | null>(null)
 
   const { theme } = useTheme()
+
+  const handleMapClick = (event: any) => {
+    const { lat, lng } = event.latlng
+    setTempCircle({ lat, lng, radius: 0, gmv: 0, bubble: true })
+    setIsModalOpen(true)
+  }
 
   const handleEditCircle = (editedCircle: CircleData, index: number) => {
     const newCircles = [...circles]
@@ -85,10 +113,9 @@ const Map: React.FC = () => {
   }
 
   const handleAddCircle = (values: CircleForm) => {
-    console.log(values)
     const newCircle: CircleData = {
-      lat: parseFloat(values.lat),
-      lng: parseFloat(values.lng),
+      lat: tempCircle ? tempCircle.lat : parseFloat(values.lat),
+      lng: tempCircle ? tempCircle.lng : parseFloat(values.lng),
       radius: parseFloat(values.radius) * 1000,
       gmv: parseFloat(values.gmv),
       bubble: values.bubble,
@@ -215,6 +242,8 @@ const Map: React.FC = () => {
       >
         <ChangeView center={mapCenter} />
         <TileLayer url={tileUrl} />
+        <MapEventHandler handleMapClick={handleMapClick} />
+
         {circles.map((circle, idx) => {
           if (!circle.bubble) return
 
@@ -254,7 +283,10 @@ const Map: React.FC = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={null}
       >
-        <AddCircleForm handleAddCircle={handleAddCircle} />
+        <AddCircleForm
+          handleAddCircle={handleAddCircle}
+          initialValues={tempCircle || null}
+        />
       </Modal>
 
       <Modal

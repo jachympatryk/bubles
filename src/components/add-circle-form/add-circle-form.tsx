@@ -4,17 +4,18 @@ import { AddCircleFormProps } from './add-circle-form.types'
 import styles from './add-circle-form.module.scss'
 export const AddCircleForm: React.FC<AddCircleFormProps> = ({
   handleAddCircle,
+  initialValues,
 }) => {
   return (
     <Form
       layout="vertical"
       onFinish={handleAddCircle}
       initialValues={{
-        lat: '',
-        lng: '',
-        radius: '',
-        gmv: '',
-        bubble: false,
+        lat: initialValues?.lat || '',
+        lng: initialValues?.lng || '',
+        radius: initialValues?.radius || '',
+        gmv: initialValues?.gmv || '',
+        bubble: initialValues?.bubble || false,
       }}
       className={styles.container}
     >

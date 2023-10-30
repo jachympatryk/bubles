@@ -1,3 +1,5 @@
+import { LeafletMouseEvent } from 'leaflet'
+
 export interface CircleData {
   lat: number
   lng: number
@@ -20,4 +22,8 @@ export interface ExcelData {
   'Bubble radius (km)': string
   GMV: string
   Bubble: 'Yes' | 'No'
+}
+
+export interface MapEventHandlerProps {
+  handleMapClick: (event: LeafletMouseEvent) => void
 }
