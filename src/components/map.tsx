@@ -12,29 +12,6 @@ import * as XLSX from 'xlsx'
 import { Modal, Button, Input, Form } from 'antd'
 import { saveAs } from 'file-saver'
 
-import * as yup from 'yup'
-
-const circleSchema = yup.object().shape({
-  lat: yup
-    .number()
-    .required('Szerokość geograficzna jest wymagana')
-    .min(-90, 'Minimalna szerokość to -90')
-    .max(90, 'Maksymalna szerokość to 90'),
-  lng: yup
-    .number()
-    .required('Długość geograficzna jest wymagana')
-    .min(-180, 'Minimalna długość to -180')
-    .max(180, 'Maksymalna długość to 180'),
-  radius: yup
-    .number()
-    .required('Promień jest wymagany')
-    .min(0, 'Promień nie może być ujemny'),
-  gmv: yup
-    .number()
-    .required('GMV jest wymagane')
-    .min(0, 'GMV nie może być ujemne'),
-})
-
 interface CircleData {
   lat: number
   lng: number
@@ -71,12 +48,6 @@ const Map: React.FC = () => {
   const [maxGMV, setMaxGMV] = useState<number>(-Infinity)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false)
-  const [circleForm, setCircleForm] = useState<CircleForm>({
-    lat: '',
-    lng: '',
-    radius: '',
-    gmv: '',
-  })
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     52.229675, 21.01223,
   ])
@@ -86,11 +57,6 @@ const Map: React.FC = () => {
       type: 'text/plain;charset=utf-8',
     })
     saveAs(blob, 'circles.json')
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setCircleForm({ ...circleForm, [name]: value })
   }
 
   function ChangeView({ center }: { center: [number, number] }) {
@@ -143,12 +109,6 @@ const Map: React.FC = () => {
     const gmvValues = circles.map(circle => circle.gmv)
     setMinGMV(Math.min(newCircle.gmv, ...gmvValues))
     setMaxGMV(Math.max(newCircle.gmv, ...gmvValues))
-    setCircleForm({
-      lat: '',
-      lng: '',
-      radius: '',
-      gmv: '',
-    })
     setIsModalOpen(false)
   }
 
