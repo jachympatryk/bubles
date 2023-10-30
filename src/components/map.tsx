@@ -57,53 +57,16 @@ const Map: React.FC = () => {
     52.229675, 21.01223,
   ])
 
-  const [editingCircle, setEditingCircle] = useState<CircleData | null>(null)
-  const [editingCircleIndex, setEditingCircleIndex] = useState<number | null>(
-    null
-  )
-  const [editingForm, setEditingForm] = useState<CircleForm>({
-    lat: '',
-    lng: '',
-    radius: '',
-    gmv: '',
-  })
-
-  const handleUpdateCircle = () => {
-    if (editingCircleIndex !== null && editingCircle) {
-      const newCircles = [...circles]
-      newCircles[editingCircleIndex] = editingCircle
-      setCircles(newCircles)
-      setEditingCircle(null)
-      setEditingCircleIndex(null)
-    }
-  }
-
-  const handleEditingInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    if (editingCircle) {
-      setEditingCircle({ ...editingCircle, [name]: parseFloat(value) })
-    }
-  }
-
-  const handleEditCircle = (index: number) => {
-    setEditingCircle(circles[index])
-    setEditingCircleIndex(index)
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    if (editingCircleIndex !== null) {
-      setEditingForm({ ...editingForm, [name]: value })
-    } else {
-      setCircleForm({ ...circleForm, [name]: value })
-    }
-  }
-
   const exportCircles = () => {
     const blob = new Blob([JSON.stringify(circles)], {
       type: 'text/plain;charset=utf-8',
     })
     saveAs(blob, 'circles.json')
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setCircleForm({ ...circleForm, [name]: value })
   }
 
   function ChangeView({ center }: { center: [number, number] }) {
@@ -344,14 +307,6 @@ const Map: React.FC = () => {
               <button
                 onClick={e => {
                   e.stopPropagation()
-                  handleEditCircle(index)
-                }}
-              >
-                Edytuj
-              </button>
-              <button
-                onClick={e => {
-                  e.stopPropagation()
                   handleRemoveCircle(index)
                 }}
               >
@@ -360,47 +315,6 @@ const Map: React.FC = () => {
             </li>
           ))}
         </ul>
-        {editingCircle && (
-          <div>
-            <h3>Edycja okręgu</h3>
-            <Form layout="vertical">
-              <Form.Item label="Szerokość geograficzna:">
-                <Input
-                  name="lat"
-                  value={editingCircle.lat}
-                  onChange={handleEditingInputChange}
-                />
-              </Form.Item>
-              <Form.Item label="Długość geograficzna:">
-                <Input
-                  name="lng"
-                  value={editingCircle.lng}
-                  onChange={handleEditingInputChange}
-                />
-              </Form.Item>
-              <Form.Item label="Promień (w km):">
-                <Input
-                  name="radius"
-                  value={editingCircle.radius / 1000} // Konwersja metrów na kilometry
-                  onChange={handleEditingInputChange}
-                />
-              </Form.Item>
-              <Form.Item label="GMV:">
-                <Input
-                  name="gmv"
-                  value={editingCircle.gmv}
-                  onChange={handleEditingInputChange}
-                />
-              </Form.Item>
-              <Button type="primary" onClick={handleUpdateCircle}>
-                Zaktualizuj
-              </Button>
-              <Button type="primary" onClick={() => setEditingCircle(null)}>
-                Zamknij
-              </Button>
-            </Form>
-          </div>
-        )}
       </Modal>
     </div>
   )
