@@ -184,6 +184,17 @@ const Map: React.FC = () => {
     }
   }, [circles])
 
+  useEffect(() => {
+    localStorage.setItem('circles', JSON.stringify(circles))
+  }, [circles])
+
+  useEffect(() => {
+    const savedCircles = localStorage.getItem('circles')
+    if (savedCircles) {
+      setCircles(JSON.parse(savedCircles))
+    }
+  }, [])
+
   return (
     <div className={styles.mapContainer}>
       <MapContainer
