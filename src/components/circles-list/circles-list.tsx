@@ -9,6 +9,7 @@ export const CirclesList: React.FC<CirclesListProps> = ({
   handleRemoveCircle,
   handleEditCircle,
   centerMapOnCircle,
+  handleRemoveAllCircles,
 }) => {
   const [editingIndex, setEditingIndex] = useState(-1)
 
@@ -27,6 +28,12 @@ export const CirclesList: React.FC<CirclesListProps> = ({
 
   return (
     <ul className={styles.infoList}>
+      <Button
+        onClick={() => handleRemoveAllCircles()}
+        style={{ margin: '10px 0' }}
+      >
+        Usuń wszystkie okręgi
+      </Button>
       {circles.map((circle, index) => {
         const bubbleValue = circle.bubble ? 'Tak' : 'Nie'
 

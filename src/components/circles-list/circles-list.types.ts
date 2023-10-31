@@ -5,4 +5,5 @@ export type CirclesListProps = {
   handleRemoveCircle: (index: number) => void
   centerMapOnCircle: (circle: CircleData) => void
   handleEditCircle: (editedCircle: CircleData, index: number) => void
+  handleRemoveAllCircles: () => void
 }

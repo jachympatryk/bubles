@@ -209,6 +209,11 @@ const Map: React.FC = () => {
     return `rgb(${red}, 0, ${blue})`
   }
 
+  const handleRemoveAllCircles = () => {
+    setCircles([])
+    localStorage.setItem('circles', JSON.stringify([]))
+  }
+
   const handleRemoveCircle = (index: number) => {
     const newCircles = [...circles]
     newCircles.splice(index, 1)
@@ -316,6 +321,7 @@ const Map: React.FC = () => {
           circles={circles}
           handleRemoveCircle={handleRemoveCircle}
           centerMapOnCircle={centerMapOnCircle}
+          handleRemoveAllCircles={handleRemoveAllCircles}
         />
       </Modal>
       <Modal
