@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -67,6 +67,7 @@ const Map: React.FC = () => {
     const newCircles = [...circles]
     newCircles[index] = editedCircle
     setCircles(newCircles)
+    localStorage.setItem('circles', JSON.stringify(newCircles))
   }
 
   const exportCircles = () => {
@@ -95,6 +96,9 @@ const Map: React.FC = () => {
             const newCircles = [...circles, ...importedCircles]
 
             setCircles(newCircles)
+            localStorage.setItem('circles', JSON.stringify(newCircles))
+
+            setCircles(newCircles)
 
             const gmvValues = importedCircles.map(circle => circle.gmv)
             setMinGMV(Math.min(...gmvValues))
@@ -121,10 +125,13 @@ const Map: React.FC = () => {
       bubble: values.bubble,
     }
 
-    setCircles([...circles, newCircle])
+    const newCircles = [...circles, newCircle]
+    setCircles(newCircles)
+    localStorage.setItem('circles', JSON.stringify(newCircles))
+
     setMapCenter([newCircle.lat, newCircle.lng])
 
-    const gmvValues = circles.map(circle => circle.gmv)
+    const gmvValues = newCircles.map(circle => circle.gmv)
     setMinGMV(Math.min(newCircle.gmv, ...gmvValues))
     setMaxGMV(Math.max(newCircle.gmv, ...gmvValues))
     setIsModalOpen(false)
@@ -167,6 +174,9 @@ const Map: React.FC = () => {
           const newCircles = [...circles, ...formattedData]
 
           setCircles(newCircles)
+          localStorage.setItem('circles', JSON.stringify(newCircles))
+
+          setCircles(newCircles)
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
@@ -203,6 +213,7 @@ const Map: React.FC = () => {
     const newCircles = [...circles]
     newCircles.splice(index, 1)
     setCircles(newCircles)
+    localStorage.setItem('circles', JSON.stringify(newCircles))
 
     if (newCircles.length > 0) {
       const gmvValues = newCircles.map(circle => circle.gmv)
@@ -221,13 +232,18 @@ const Map: React.FC = () => {
   }, [circles])
 
   useEffect(() => {
-    localStorage.setItem('circles', JSON.stringify(circles))
-  }, [circles])
-
-  useEffect(() => {
     const savedCircles = localStorage.getItem('circles')
+
     if (savedCircles) {
-      setCircles(JSON.parse(savedCircles))
+      const parsedCircles: CircleData[] = JSON.parse(savedCircles)
+      if (Array.isArray(parsedCircles)) {
+        setCircles(parsedCircles)
+        if (parsedCircles.length > 0) {
+          const gmvValues = parsedCircles.map(circle => circle.gmv)
+          setMinGMV(Math.min(...gmvValues))
+          setMaxGMV(Math.max(...gmvValues))
+        }
+      }
     }
   }, [])
 
