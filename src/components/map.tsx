@@ -9,7 +9,7 @@ import {
 import styles from './map.module.scss'
 import 'leaflet/dist/leaflet.css'
 import * as XLSX from 'xlsx'
-import { Modal } from 'antd'
+import { Modal, Slider } from 'antd'
 import { saveAs } from 'file-saver'
 import { CirclesList } from './circles-list/circles-list'
 import {
@@ -23,6 +23,7 @@ import { Buttons } from './buttons/buttons'
 import DataAnalysis from './data-analysis/data-analysis'
 import { useTheme } from '../providers/theme-provider.provider'
 import { ThemeToggleButton } from './theme-toggle-button/theme-toggle-button'
+import { Filters } from './filters/filters'
 
 const MapEventHandler: React.FC<MapEventHandlerProps> = ({
   handleMapClick,
@@ -54,8 +55,13 @@ const Map: React.FC = () => {
   ])
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
   const [tempCircle, setTempCircle] = useState<CircleData | null>(null)
+  const [gmvFilter, setGmvFilter] = useState<number>(0)
 
   const { theme } = useTheme()
+
+  const handleGmvFilterChange = (value: number) => {
+    setGmvFilter(value)
+  }
 
   const handleMapClick = (event: any) => {
     const { lat, lng } = event.latlng
@@ -267,25 +273,27 @@ const Map: React.FC = () => {
         <TileLayer url={tileUrl} />
         <MapEventHandler handleMapClick={handleMapClick} />
 
-        {circles.map((circle, idx) => {
-          if (!circle.bubble) return
+        {circles
+          .filter(circle => circle.gmv >= gmvFilter)
+          .map((circle, idx) => {
+            if (!circle.bubble) return null
 
-          const circleColor = getColorFromGMV(circle.gmv, minGMV, maxGMV)
-          return (
-            <React.Fragment key={idx}>
-              <Circle
-                center={[circle.lat, circle.lng]}
-                radius={circle.radius}
-                pathOptions={{ color: circleColor }}
-              />
-              <CircleMarker
-                center={[circle.lat, circle.lng]}
-                radius={3}
-                pathOptions={{ color: circleColor }}
-              />
-            </React.Fragment>
-          )
-        })}
+            const circleColor = getColorFromGMV(circle.gmv, minGMV, maxGMV)
+            return (
+              <React.Fragment key={idx}>
+                <Circle
+                  center={[circle.lat, circle.lng]}
+                  radius={circle.radius}
+                  pathOptions={{ color: circleColor }}
+                />
+                <CircleMarker
+                  center={[circle.lat, circle.lng]}
+                  radius={3}
+                  pathOptions={{ color: circleColor }}
+                />
+              </React.Fragment>
+            )
+          })}
       </MapContainer>
 
       <Buttons
@@ -298,6 +306,13 @@ const Map: React.FC = () => {
         setIsModalOpen={setIsModalOpen}
         exportCircles={exportCircles}
         setIsDataModal={setIsDataModal}
+      />
+
+      <Filters
+        gmvFilter={gmvFilter}
+        handleGmvFilterChange={handleGmvFilterChange}
+        maxGMV={maxGMV}
+        setGmvFilter={setGmvFilter}
       />
 
       <Modal
