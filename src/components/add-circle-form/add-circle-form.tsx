@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Checkbox, Form, Input } from 'antd'
 import { AddCircleFormProps } from './add-circle-form.types'
 import styles from './add-circle-form.module.scss'
+
 export const AddCircleForm: React.FC<AddCircleFormProps> = ({
   handleAddCircle,
   initialValues,
@@ -34,7 +35,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
           },
         ]}
       >
-        <Input type="number" />
+        <Input type="number" className={styles.input} />
       </Form.Item>
       <Form.Item
         label="Długość geograficzna:"
@@ -51,7 +52,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
           },
         ]}
       >
-        <Input type="number" />
+        <Input type="number" className={styles.input} />
       </Form.Item>
       <Form.Item
         label="Promień (w km):"
@@ -69,7 +70,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
           },
         ]}
       >
-        <Input type="number" />
+        <Input type="number" className={styles.input} />
       </Form.Item>
       <Form.Item
         label="GMV:"
@@ -86,12 +87,17 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
           },
         ]}
       >
-        <Input type="number" />
+        <Input type="number" className={styles.input} />
       </Form.Item>
-      <Form.Item label="Pokazuj okrąg:" name="bubble" valuePropName="checked">
+      <Form.Item
+        label="Pokazuj okrąg:"
+        name="bubble"
+        valuePropName="checked"
+        className={styles.checkbox}
+      >
         <Checkbox />
       </Form.Item>
-      <Button type="primary" htmlType="submit">
+      <Button type="primary" htmlType="submit" className={styles.button}>
         Dodaj
       </Button>
     </Form>
