@@ -66,8 +66,9 @@ const Map: React.FC = () => {
   const handleEditCircle = (editedCircle: CircleData, index: number) => {
     const newCircles = [...circles]
     newCircles[index] = editedCircle
-    setCircles(newCircles)
-    localStorage.setItem('circles', JSON.stringify(newCircles))
+    const sortedCircles = newCircles.sort((a, b) => b.gmv - a.gmv)
+    setCircles(sortedCircles)
+    localStorage.setItem('circles', JSON.stringify(sortedCircles))
   }
 
   const exportCircles = () => {
@@ -94,11 +95,9 @@ const Map: React.FC = () => {
             const importedCircles: CircleData[] = JSON.parse(text)
 
             const newCircles = [...circles, ...importedCircles]
-
+            newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
             setCircles(newCircles)
             localStorage.setItem('circles', JSON.stringify(newCircles))
-
-            setCircles(newCircles)
 
             const gmvValues = importedCircles.map(circle => circle.gmv)
             setMinGMV(Math.min(...gmvValues))
@@ -126,6 +125,7 @@ const Map: React.FC = () => {
     }
 
     const newCircles = [...circles, newCircle]
+    newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
     setCircles(newCircles)
     localStorage.setItem('circles', JSON.stringify(newCircles))
 
@@ -217,6 +217,7 @@ const Map: React.FC = () => {
   const handleRemoveCircle = (index: number) => {
     const newCircles = [...circles]
     newCircles.splice(index, 1)
+    newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
     setCircles(newCircles)
     localStorage.setItem('circles', JSON.stringify(newCircles))
 
@@ -242,6 +243,7 @@ const Map: React.FC = () => {
     if (savedCircles) {
       const parsedCircles: CircleData[] = JSON.parse(savedCircles)
       if (Array.isArray(parsedCircles)) {
+        parsedCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
         setCircles(parsedCircles)
         if (parsedCircles.length > 0) {
           const gmvValues = parsedCircles.map(circle => circle.gmv)
