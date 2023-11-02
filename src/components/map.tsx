@@ -9,7 +9,7 @@ import {
 import styles from './map.module.scss'
 import 'leaflet/dist/leaflet.css'
 import * as XLSX from 'xlsx'
-import { Modal, Slider } from 'antd'
+import { Modal } from 'antd'
 import { saveAs } from 'file-saver'
 import { CirclesList } from './circles-list/circles-list'
 import {
@@ -23,7 +23,8 @@ import { Buttons } from './buttons/buttons'
 import DataAnalysis from './data-analysis/data-analysis'
 import { useTheme } from '../providers/theme-provider.provider'
 import { ThemeToggleButton } from './theme-toggle-button/theme-toggle-button'
-import { Filters } from './filters/filters'
+
+const poznanCoordinates: [number, number] = [52.409538, 16.931992]
 
 const MapEventHandler: React.FC<MapEventHandlerProps> = ({
   handleMapClick,
@@ -50,18 +51,17 @@ const Map: React.FC = () => {
   const [maxGMV, setMaxGMV] = useState<number>(-Infinity)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false)
-  const [mapCenter, setMapCenter] = useState<[number, number]>([
-    52.229675, 21.01223,
-  ])
+  const [mapCenter, setMapCenter] =
+    useState<[number, number]>(poznanCoordinates)
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
   const [tempCircle, setTempCircle] = useState<CircleData | null>(null)
-  const [gmvFilter, setGmvFilter] = useState<number>(0)
+  const [gmvFilter] = useState<number>(0)
 
   const { theme } = useTheme()
 
-  const handleGmvFilterChange = (value: number) => {
-    setGmvFilter(value)
-  }
+  // const handleGmvFilterChange = (value: number) => {
+  //   setGmvFilter(value)
+  // }
 
   const handleMapClick = (event: any) => {
     const { lat, lng } = event.latlng
@@ -308,12 +308,12 @@ const Map: React.FC = () => {
         setIsDataModal={setIsDataModal}
       />
 
-      <Filters
-        gmvFilter={gmvFilter}
-        handleGmvFilterChange={handleGmvFilterChange}
-        maxGMV={maxGMV}
-        setGmvFilter={setGmvFilter}
-      />
+      {/*<Filters*/}
+      {/*  gmvFilter={gmvFilter}*/}
+      {/*  handleGmvFilterChange={handleGmvFilterChange}*/}
+      {/*  maxGMV={maxGMV}*/}
+      {/*  setGmvFilter={setGmvFilter}*/}
+      {/*/>*/}
 
       <Modal
         title="Dodaj okrąg"
