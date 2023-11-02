@@ -41,9 +41,9 @@ export const Buttons: React.FC<ButtonsProps> = ({
         Pokaż dane
       </Button>
 
-      <Button onClick={() => fileInputRef.current?.click()}>
-        Importuj Okręgi
-      </Button>
+      {/*<Button onClick={() => fileInputRef.current?.click()}>*/}
+      {/*  Importuj Okręgi*/}
+      {/*</Button>*/}
       <input
         ref={fileInputRef}
         type="file"

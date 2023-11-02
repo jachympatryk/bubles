@@ -145,6 +145,8 @@ const Map: React.FC = () => {
               }
             })
 
+            console.log(importedCircles)
+
             newCircles.sort((a, b) => b.gmv - a.gmv)
             setCircles(newCircles)
             localStorage.setItem('circles', JSON.stringify(newCircles))
@@ -201,32 +203,36 @@ const Map: React.FC = () => {
             raw: false,
           })
 
-          const formattedData: CircleData[] = json.map(item => {
-            const bubbleValue = item.Bubble === 'Yes'
+          const importedCircles: CircleData[] = json.map(item => {
+            const gmv = parseFloat(item.gmv)
 
-            const gmv = parseFloat(item.GMV)
-            return {
-              lat: parseFloat(item.Latitude),
-              lng: parseFloat(item.Longitude),
-              radius: parseFloat(item['Bubble radius (km)']) * 1000, // Konwersja km na metry
+            const circle: CircleData = {
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lng),
+              radius: parseFloat(item.radius),
               gmv: isNaN(gmv) ? 0 : gmv,
-              bubble: bubbleValue,
+              bubble: item.bubble === 'PRAWDA' || 'TRUE' ? true : false,
+            }
+            return circle
+          })
+
+          const newCircles = [...circles]
+          importedCircles.forEach(importedCircle => {
+            const intersectingCircles = newCircles.filter(newCircle =>
+              doCirclesIntersect(importedCircle, newCircle)
+            )
+            if (intersectingCircles.length < 6) {
+              newCircles.push(importedCircle)
             }
           })
 
-          const gmvValues = formattedData.map(item => item.gmv)
-          const minVal = Math.min(...gmvValues)
-          const maxVal = Math.max(...gmvValues)
-
-          setMinGMV(minVal)
-          setMaxGMV(maxVal)
-
-          const newCircles = [...circles, ...formattedData]
-
+          newCircles.sort((a, b) => b.gmv - a.gmv)
           setCircles(newCircles)
           localStorage.setItem('circles', JSON.stringify(newCircles))
 
-          setCircles(newCircles)
+          const gmvValues = importedCircles.map(circle => circle.gmv)
+          setMinGMV(Math.min(...gmvValues, minGMV))
+          setMaxGMV(Math.max(...gmvValues, maxGMV))
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
@@ -239,6 +245,59 @@ const Map: React.FC = () => {
       fileInputExcelRef.current.value = ''
     }
   }
+
+  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files ? e.target.files[0] : null
+  //
+  //   if (file) {
+  //     const reader = new FileReader()
+  //     reader.onload = (e: any) => {
+  //       try {
+  //         const data = new Uint8Array(e.target.result)
+  //         const workbook = XLSX.read(data, { type: 'array' })
+  //         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  //         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
+  //           raw: false,
+  //         })
+  //
+  //         const formattedData: CircleData[] = json.map(item => {
+  //           const bubbleValue = item.Bubble === 'Yes'
+  //
+  //           const gmv = parseFloat(item.GMV)
+  //           return {
+  //             lat: parseFloat(item.Latitude),
+  //             lng: parseFloat(item.Longitude),
+  //             radius: parseFloat(item['Bubble radius (km)']) * 1000, // Konwersja km na metry
+  //             gmv: isNaN(gmv) ? 0 : gmv,
+  //             bubble: bubbleValue,
+  //           }
+  //         })
+  //
+  //         const gmvValues = formattedData.map(item => item.gmv)
+  //         const minVal = Math.min(...gmvValues)
+  //         const maxVal = Math.max(...gmvValues)
+  //
+  //         setMinGMV(minVal)
+  //         setMaxGMV(maxVal)
+  //
+  //         const newCircles = [...circles, ...formattedData]
+  //
+  //         setCircles(newCircles)
+  //         localStorage.setItem('circles', JSON.stringify(newCircles))
+  //
+  //         setCircles(newCircles)
+  //       } catch (error) {
+  //         console.error('Wystąpił błąd podczas wczytywania pliku', error)
+  //       }
+  //     }
+  //
+  //     reader.readAsArrayBuffer(file)
+  //   }
+  //
+  //   if (fileInputExcelRef.current) {
+  //     fileInputExcelRef.current.value = ''
+  //   }
+  // }
 
   const centerMapOnCircle = (circle: CircleData) => {
     setMapCenter([circle.lat, circle.lng])

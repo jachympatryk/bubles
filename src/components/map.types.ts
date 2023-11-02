@@ -17,11 +17,11 @@ export interface CircleForm {
 }
 
 export interface ExcelData {
-  Latitude: string
-  Longitude: string
-  'Bubble radius (km)': string
-  GMV: string
-  Bubble: 'Yes' | 'No'
+  lat: string
+  lng: string
+  radius: string
+  gmv: string
+  bubble: 'PRAWDA' | 'FALSZ' | 'TRUE' | 'FALSE'
 }
 
 export interface MapEventHandlerProps {
