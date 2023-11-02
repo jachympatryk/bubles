@@ -140,7 +140,7 @@ const Map: React.FC = () => {
               const intersectingCircles = newCircles.filter(newCircle =>
                 doCirclesIntersect(importedCircle, newCircle)
               )
-              if (intersectingCircles.length < 7) {
+              if (intersectingCircles.length < 6) {
                 newCircles.push(importedCircle)
               }
             })
