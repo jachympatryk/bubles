@@ -5,12 +5,10 @@ import { ButtonsProps } from './buttons.types'
 
 export const Buttons: React.FC<ButtonsProps> = ({
   fileInputExcelRef,
-  fileInputRef,
   setIsInfoModalOpen,
   setIsModalOpen,
   handleFileUpload,
   circles,
-  importCircles,
   exportCircles,
   setIsDataModal,
 }) => {
@@ -41,16 +39,6 @@ export const Buttons: React.FC<ButtonsProps> = ({
         Pokaż dane
       </Button>
 
-      {/*<Button onClick={() => fileInputRef.current?.click()}>*/}
-      {/*  Importuj Okręgi*/}
-      {/*</Button>*/}
-      <input
-        ref={fileInputRef}
-        type="file"
-        style={{ display: 'none' }}
-        onChange={importCircles}
-        accept=".json"
-      />
       <Button disabled={circles.length === 0} onClick={exportCircles}>
         Eksportuj Okręgi
       </Button>

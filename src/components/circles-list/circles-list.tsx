@@ -47,6 +47,7 @@ export const CirclesList: React.FC<CirclesListProps> = ({
               />
             ) : (
               <>
+                <p>Name: {circle.name}</p>
                 <p>Latitude: {circle.lat}</p>
                 <p>Longitude: {circle.lng}</p>
                 <p>Radius: {circle.radius / 1000} km</p>

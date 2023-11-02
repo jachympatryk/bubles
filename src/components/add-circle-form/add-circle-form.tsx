@@ -17,6 +17,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         radius: initialValues?.radius || '',
         gmv: initialValues?.gmv || '',
         bubble: initialValues?.bubble || false,
+        name: initialValues?.name || '',
       }}
       className={styles.container}
     >
@@ -88,6 +89,18 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         ]}
       >
         <Input type="number" className={styles.input} />
+      </Form.Item>
+      <Form.Item
+        label="Nazwa:"
+        name="name"
+        rules={[
+          {
+            required: true,
+            message: 'Prosze wprowadzić nazwę!',
+          },
+        ]}
+      >
+        <Input type="string" className={styles.input} />
       </Form.Item>
       <Form.Item
         label="Pokazuj okrąg:"

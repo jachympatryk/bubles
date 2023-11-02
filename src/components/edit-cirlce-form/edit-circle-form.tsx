@@ -10,9 +10,7 @@ export const EditCircleForm: React.FC<EditCircleFormProps> = ({
 }) => {
   const [editedCircle, setEditedCircle] = useState<CircleData>(circle)
 
-  console.log(editedCircle)
-
-  const handleChange = (field: string, value: number | boolean) => {
+  const handleChange = (field: string, value: number | boolean | string) => {
     setEditedCircle({
       ...editedCircle,
       [field]: value,
@@ -26,6 +24,14 @@ export const EditCircleForm: React.FC<EditCircleFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className={styles.editCircleForm}>
+      <label className={styles.checkboxLabel}>
+        Nazwa:
+        <input
+          type="string"
+          value={editedCircle.name}
+          onChange={e => handleChange('name', e.target.value)}
+        />
+      </label>
       <label>
         Latitude:
         <input

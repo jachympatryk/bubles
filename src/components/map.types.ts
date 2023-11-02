@@ -6,6 +6,7 @@ export interface CircleData {
   radius: number
   gmv: number
   bubble: boolean
+  name: string
 }
 
 export interface CircleForm {
@@ -14,6 +15,7 @@ export interface CircleForm {
   radius: string
   gmv: string
   bubble: boolean
+  name: string
 }
 
 export interface ExcelData {
@@ -22,6 +24,7 @@ export interface ExcelData {
   radius: string
   gmv: string
   bubble: 'PRAWDA' | 'FALSZ' | 'TRUE' | 'FALSE'
+  name: string
 }
 
 export interface MapEventHandlerProps {
