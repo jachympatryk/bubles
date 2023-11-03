@@ -157,9 +157,10 @@ const Map: React.FC = () => {
               gmv: parseFloat(item.gmv) || 0,
               name: item.store_name,
               storeId: item.store_id,
-              bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
-              storeAddressId: parseInt(item.store_address_lat),
-              deliveryTime: parseInt(item.delivery_time),
+              bubble:
+                item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
+              storeAddressId: parseInt(item.store_address_lat) || 0,
+              deliveryTime: parseInt(item.delivery_time) || 0,
             }))
             .sort((a, b) => b.gmv - a.gmv)
 
