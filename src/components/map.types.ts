@@ -1,13 +1,15 @@
 import { LeafletMouseEvent } from 'leaflet'
 
 export interface CircleData {
+  name: string
+  storeId: number
+  storeAddressId: number
   lat: number
   lng: number
   radius: number
-  gmv: number
+  deliveryTime: number
   bubble: boolean
-  name: string
-  storeId: number
+  gmv: number
 }
 
 export interface CircleForm {
@@ -21,13 +23,15 @@ export interface CircleForm {
 }
 
 export interface ExcelData {
-  lat: string
-  lng: string
-  radius: string
+  store_name: string
+  store_id: number
+  store_address_id: string
+  store_address_lat: string
+  store_address_lon: string
+  maximum_delivery_distance_meters: string
+  delivery_time: string
   gmv: string
   bubble: 'PRAWDA' | 'FALSZ' | 'TRUE' | 'FALSE'
-  name: string
-  store_id: number
 }
 
 export interface MapEventHandlerProps {

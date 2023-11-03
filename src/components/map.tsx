@@ -68,6 +68,8 @@ const Map: React.FC = () => {
       bubble: true,
       name: '',
       storeId: 0,
+      deliveryTime: 0,
+      storeAddressId: 0,
     })
     setIsModalOpen(true)
   }
@@ -82,8 +84,17 @@ const Map: React.FC = () => {
 
   const exportCircles = () => {
     const modifiedCircles = circles.map(circle => {
-      const { storeId, ...rest } = circle
-      return { ...rest, store_id: storeId }
+      return {
+        store_name: circle.name,
+        store_id: circle.storeId,
+        store_address_id: circle.storeAddressId,
+        store_address_lat: circle.lat,
+        store_address_lon: circle.lng,
+        maximum_delivery_distance_meters: circle.radius,
+        delivery_time: circle.deliveryTime,
+        bubble: circle.bubble,
+        gmv: circle.gmv,
+      }
     })
 
     const ws = XLSX.utils.json_to_sheet(modifiedCircles)
@@ -140,13 +151,15 @@ const Map: React.FC = () => {
 
           const importedCircles: CircleData[] = json
             .map(item => ({
-              lat: parseFloat(item.lat.replace(',', '.')),
-              lng: parseFloat(item.lng.replace(',', '.')),
-              radius: parseFloat(item.radius),
+              lat: parseFloat(item.store_address_lat.replace(',', '.')),
+              lng: parseFloat(item.store_address_lon.replace(',', '.')),
+              radius: parseFloat(item.maximum_delivery_distance_meters),
               gmv: parseFloat(item.gmv) || 0,
-              bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
-              name: item.name,
+              name: item.store_name,
               storeId: item.store_id,
+              bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
+              storeAddressId: parseInt(item.store_address_lat),
+              deliveryTime: parseInt(item.delivery_time),
             }))
             .sort((a, b) => b.gmv - a.gmv)
 
@@ -209,6 +222,8 @@ const Map: React.FC = () => {
       bubble: values.bubble,
       name: values.name,
       storeId: values.storeId,
+      storeAddressId: 0,
+      deliveryTime: 0,
     }
 
     const newCircles = [...circles, newCircle]
