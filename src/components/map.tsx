@@ -60,7 +60,15 @@ const Map: React.FC = () => {
 
   const handleMapClick = (event: any) => {
     const { lat, lng } = event.latlng
-    setTempCircle({ lat, lng, radius: 0, gmv: 0, bubble: true, name: '' })
+    setTempCircle({
+      lat,
+      lng,
+      radius: 0,
+      gmv: 0,
+      bubble: true,
+      name: '',
+      storeId: 0,
+    })
     setIsModalOpen(true)
   }
 
@@ -72,7 +80,6 @@ const Map: React.FC = () => {
     localStorage.setItem('circles', JSON.stringify(sortedCircles))
   }
 
-  // EXCEL
   const exportCircles = () => {
     const ws = XLSX.utils.json_to_sheet(circles)
     const wb = XLSX.utils.book_new()
@@ -113,29 +120,6 @@ const Map: React.FC = () => {
     return distance < totalRadii
   }
 
-  const handleAddCircle = (values: CircleForm) => {
-    const newCircle: CircleData = {
-      lat: tempCircle ? tempCircle.lat : parseFloat(values.lat),
-      lng: tempCircle ? tempCircle.lng : parseFloat(values.lng),
-      radius: parseFloat(values.radius) * 1000,
-      gmv: parseFloat(values.gmv),
-      bubble: values.bubble,
-      name: values.name,
-    }
-
-    const newCircles = [...circles, newCircle]
-    newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
-    setCircles(newCircles)
-    localStorage.setItem('circles', JSON.stringify(newCircles))
-
-    setMapCenter([newCircle.lat, newCircle.lng])
-
-    const gmvValues = newCircles.map(circle => circle.gmv)
-    setMinGMV(Math.min(newCircle.gmv, ...gmvValues))
-    setMaxGMV(Math.max(newCircle.gmv, ...gmvValues))
-    setIsModalOpen(false)
-  }
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null
 
@@ -150,28 +134,44 @@ const Map: React.FC = () => {
             raw: false,
           })
 
-          const importedCircles: CircleData[] = json.map(item => {
-            const gmv = parseFloat(item.gmv)
+          const importedCircles: CircleData[] = json.map(item => ({
+            lat: parseFloat(item.lat.replace(',', '.')),
+            lng: parseFloat(item.lng.replace(',', '.')),
+            radius: parseFloat(item.radius),
+            gmv: parseFloat(item.gmv) || 0,
+            bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
+            name: item.name,
+            storeId: item.store_id,
+          }))
 
-            const circle: CircleData = {
-              lat: parseFloat(item.lat),
-              lng: parseFloat(item.lng),
-              radius: parseFloat(item.radius),
-              gmv: isNaN(gmv) ? 0 : gmv,
-              bubble: item.bubble === 'PRAWDA' || 'TRUE' ? true : false,
-              name: item.name,
-            }
-            return circle
+          const circlesByStoreId: { [key: number]: CircleData[] } = {}
+          importedCircles.forEach(circle => {
+            circlesByStoreId[circle.storeId] = [
+              ...(circlesByStoreId[circle.storeId] || []),
+              circle,
+            ]
           })
 
           const newCircles = [...circles]
-          importedCircles.forEach(importedCircle => {
-            const intersectingCircles = newCircles.filter(newCircle =>
-              doCirclesIntersect(importedCircle, newCircle)
-            )
-            if (intersectingCircles.length < 6) {
-              newCircles.push(importedCircle)
-            }
+          Object.values(circlesByStoreId).forEach(group => {
+            group.forEach(circle => {
+              if (
+                !newCircles.some(
+                  existingCircle => existingCircle.storeId === circle.storeId
+                )
+              ) {
+                const intersectingCircles = newCircles.filter(
+                  newCircle =>
+                    newCircle.storeId !== circle.storeId &&
+                    doCirclesIntersect(circle, newCircle)
+                )
+                if (intersectingCircles.length < 6) {
+                  newCircles.push(circle)
+                }
+              } else {
+                newCircles.push(circle)
+              }
+            })
           })
 
           newCircles.sort((a, b) => b.gmv - a.gmv)
@@ -192,6 +192,30 @@ const Map: React.FC = () => {
     if (fileInputExcelRef.current) {
       fileInputExcelRef.current.value = ''
     }
+  }
+
+  const handleAddCircle = (values: CircleForm) => {
+    const newCircle: CircleData = {
+      lat: tempCircle ? tempCircle.lat : parseFloat(values.lat),
+      lng: tempCircle ? tempCircle.lng : parseFloat(values.lng),
+      radius: parseFloat(values.radius) * 1000,
+      gmv: parseFloat(values.gmv),
+      bubble: values.bubble,
+      name: values.name,
+      storeId: values.storeId,
+    }
+
+    const newCircles = [...circles, newCircle]
+    newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
+    setCircles(newCircles)
+    localStorage.setItem('circles', JSON.stringify(newCircles))
+
+    setMapCenter([newCircle.lat, newCircle.lng])
+
+    const gmvValues = newCircles.map(circle => circle.gmv)
+    setMinGMV(Math.min(newCircle.gmv, ...gmvValues))
+    setMaxGMV(Math.max(newCircle.gmv, ...gmvValues))
+    setIsModalOpen(false)
   }
 
   const centerMapOnCircle = (circle: CircleData) => {

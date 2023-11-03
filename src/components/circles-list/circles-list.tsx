@@ -52,6 +52,7 @@ export const CirclesList: React.FC<CirclesListProps> = ({
                 <p>Longitude: {circle.lng}</p>
                 <p>Radius: {circle.radius / 1000} km</p>
                 <p>GMV: {circle.gmv}</p>
+                <p>Store ID: {circle.storeId}</p>
                 <p>Pokaz okrąg: {bubbleValue}</p>
                 <div className={styles.buttons}>
                   <Button

@@ -18,6 +18,7 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
         gmv: initialValues?.gmv || '',
         bubble: initialValues?.bubble || false,
         name: initialValues?.name || '',
+        storeId: initialValues?.storeId || 0,
       }}
       className={styles.container}
     >
@@ -80,6 +81,23 @@ export const AddCircleForm: React.FC<AddCircleFormProps> = ({
           {
             required: true,
             message: 'Proszę wprowadzić GMV!',
+          },
+          {
+            type: 'number',
+            message: 'Proszę wprowadzić poprawną liczbę!',
+            transform: value => parseFloat(value),
+          },
+        ]}
+      >
+        <Input type="number" className={styles.input} />
+      </Form.Item>
+      <Form.Item
+        label="Store ID:"
+        name="storeId"
+        rules={[
+          {
+            required: true,
+            message: 'Proszę wprowadzić Store ID!',
           },
           {
             type: 'number',
