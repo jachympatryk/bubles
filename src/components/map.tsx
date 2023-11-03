@@ -81,13 +81,17 @@ const Map: React.FC = () => {
   }
 
   const exportCircles = () => {
-    const ws = XLSX.utils.json_to_sheet(circles)
+    const modifiedCircles = circles.map(circle => {
+      const { storeId, ...rest } = circle
+      return { ...rest, store_id: storeId }
+    })
+
+    const ws = XLSX.utils.json_to_sheet(modifiedCircles)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Circles')
 
     const now = new Date()
     const dateString = now.toISOString().split('T')[0]
-
     const fileName = `circles_${dateString}.xlsx`
 
     XLSX.writeFile(wb, fileName)
