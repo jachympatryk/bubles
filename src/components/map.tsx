@@ -97,7 +97,7 @@ const Map: React.FC = () => {
     XLSX.writeFile(wb, fileName)
   }
 
-  function ChangeView({ center }: { center: [number, number] }) {
+  const ChangeView = ({ center }: { center: [number, number] }) => {
     const map = useMap()
     map.setView(center)
     return null
@@ -138,15 +138,17 @@ const Map: React.FC = () => {
             raw: false,
           })
 
-          const importedCircles: CircleData[] = json.map(item => ({
-            lat: parseFloat(item.lat.replace(',', '.')),
-            lng: parseFloat(item.lng.replace(',', '.')),
-            radius: parseFloat(item.radius),
-            gmv: parseFloat(item.gmv) || 0,
-            bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
-            name: item.name,
-            storeId: item.store_id,
-          }))
+          const importedCircles: CircleData[] = json
+            .map(item => ({
+              lat: parseFloat(item.lat.replace(',', '.')),
+              lng: parseFloat(item.lng.replace(',', '.')),
+              radius: parseFloat(item.radius),
+              gmv: parseFloat(item.gmv) || 0,
+              bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
+              name: item.name,
+              storeId: item.store_id,
+            }))
+            .sort((a, b) => b.gmv - a.gmv)
 
           const circlesByStoreId: { [key: number]: CircleData[] } = {}
           importedCircles.forEach(circle => {
@@ -158,12 +160,14 @@ const Map: React.FC = () => {
 
           const newCircles = [...circles]
           Object.values(circlesByStoreId).forEach(group => {
-            group.forEach(circle => {
-              if (
-                !newCircles.some(
-                  existingCircle => existingCircle.storeId === circle.storeId
-                )
-              ) {
+            if (
+              !newCircles.some(
+                existingCircle => existingCircle.storeId === group[0].storeId
+              )
+            ) {
+              newCircles.push(...group)
+            } else {
+              group.forEach(circle => {
                 const intersectingCircles = newCircles.filter(
                   newCircle =>
                     newCircle.storeId !== circle.storeId &&
@@ -172,10 +176,8 @@ const Map: React.FC = () => {
                 if (intersectingCircles.length < 6) {
                   newCircles.push(circle)
                 }
-              } else {
-                newCircles.push(circle)
-              }
-            })
+              })
+            }
           })
 
           newCircles.sort((a, b) => b.gmv - a.gmv)
