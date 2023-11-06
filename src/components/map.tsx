@@ -156,7 +156,7 @@ const Map: React.FC = () => {
               radius: parseFloat(item.maximum_delivery_distance_meters),
               gmv: parseFloat(item.gmv) || 0,
               name: item.store_name,
-              storeId: item.store_id,
+              storeId: parseInt(String(item.store_id)),
               bubble:
                 item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
               storeAddressId: parseInt(item.store_address_lat) || 0,
@@ -164,43 +164,50 @@ const Map: React.FC = () => {
             }))
             .sort((a, b) => b.gmv - a.gmv)
 
-          const circlesByStoreId: { [key: number]: CircleData[] } = {}
-          importedCircles.forEach(circle => {
-            circlesByStoreId[circle.storeId] = [
-              ...(circlesByStoreId[circle.storeId] || []),
-              circle,
-            ]
-          })
+          console.log(importedCircles)
 
-          const newCircles = [...circles]
-          Object.values(circlesByStoreId).forEach(group => {
-            if (
-              !newCircles.some(
-                existingCircle => existingCircle.storeId === group[0].storeId
-              )
-            ) {
-              newCircles.push(...group)
-            } else {
-              group.forEach(circle => {
-                const intersectingCircles = newCircles.filter(
-                  newCircle =>
-                    newCircle.storeId !== circle.storeId &&
-                    doCirclesIntersect(circle, newCircle)
-                )
-                if (intersectingCircles.length < 6) {
-                  newCircles.push(circle)
+          let validCircles: CircleData[] = []
+          let processedStoreIds = new Set<number>()
+
+          importedCircles.forEach(circle => {
+            if (processedStoreIds.has(circle.storeId)) {
+              return
+            }
+
+            let intersectionCounter = 0
+
+            for (const otherCircle of validCircles) {
+              if (doCirclesIntersect(circle, otherCircle)) {
+                intersectionCounter++
+              }
+
+              if (intersectionCounter > 6) {
+                break
+              }
+            }
+
+            if (intersectionCounter <= 6) {
+              validCircles.push(circle)
+              processedStoreIds.add(circle.storeId)
+
+              importedCircles.forEach(otherCircle => {
+                if (
+                  otherCircle.storeId === circle.storeId &&
+                  otherCircle !== circle
+                ) {
+                  validCircles.push(otherCircle)
                 }
               })
             }
           })
 
-          newCircles.sort((a, b) => b.gmv - a.gmv)
-          setCircles(newCircles)
-          localStorage.setItem('circles', JSON.stringify(newCircles))
+          validCircles.sort((a, b) => b.gmv - a.gmv)
+          setCircles(validCircles)
+          localStorage.setItem('circles', JSON.stringify(validCircles))
 
-          const gmvValues = importedCircles.map(circle => circle.gmv)
-          setMinGMV(Math.min(...gmvValues, minGMV))
-          setMaxGMV(Math.max(...gmvValues, maxGMV))
+          const gmvValues = validCircles.map(circle => circle.gmv)
+          setMinGMV(Math.min(...gmvValues))
+          setMaxGMV(Math.max(...gmvValues))
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
