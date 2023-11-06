@@ -135,7 +135,7 @@ const Map: React.FC = () => {
 
     return distance < totalRadii
   }
-
+  //
   // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const file = e.target.files ? e.target.files[0] : null
   //
@@ -225,28 +225,26 @@ const Map: React.FC = () => {
             .sort((a, b) => b.gmv - a.gmv)
 
           const newCircles = [...circles]
-          const addedStoreIds = new Set<number>()
-          const skippedCircles: CircleData[] = []
+          const existingStoreIds = new Set<number>(
+            newCircles.map(c => c.storeId)
+          )
 
           importedCircles.forEach(importedCircle => {
-            if (!addedStoreIds.has(importedCircle.storeId)) {
+            if (existingStoreIds.has(importedCircle.storeId)) {
+              newCircles.push(importedCircle)
+            } else {
               const intersectingCircles = newCircles.filter(newCircle =>
                 doCirclesIntersect(importedCircle, newCircle)
               )
               if (intersectingCircles.length < 6) {
                 newCircles.push(importedCircle)
-                addedStoreIds.add(importedCircle.storeId)
-              } else {
-                skippedCircles.push(importedCircle)
+                existingStoreIds.add(importedCircle.storeId)
               }
             }
           })
 
-          newCircles.push(...skippedCircles)
-
           newCircles.sort((a, b) => b.gmv - a.gmv)
           setCircles(newCircles)
-          console.log(newCircles)
           localStorage.setItem('circles', JSON.stringify(newCircles))
 
           const gmvValues = newCircles.map(circle => circle.gmv)
