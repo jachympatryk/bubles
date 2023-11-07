@@ -224,17 +224,19 @@ const Map: React.FC = () => {
             }))
             .sort((a, b) => b.gmv - a.gmv)
 
-          const newCircles = [...circles]
+          const newCircles: CircleData[] = [...circles]
+          const sameIdCircles: CircleData[] = []
           const existingStoreIds = new Set<number>(
             newCircles.map(c => c.storeId)
           )
 
           importedCircles.forEach(importedCircle => {
             if (existingStoreIds.has(importedCircle.storeId)) {
-              newCircles.push(importedCircle)
+              sameIdCircles.push(importedCircle)
+              console.log(importedCircle)
             } else {
-              const intersectingCircles = newCircles.filter(newCircle =>
-                doCirclesIntersect(importedCircle, newCircle)
+              const intersectingCircles: CircleData[] = newCircles.filter(
+                newCircle => doCirclesIntersect(importedCircle, newCircle)
               )
               if (intersectingCircles.length < 6) {
                 newCircles.push(importedCircle)
@@ -243,11 +245,13 @@ const Map: React.FC = () => {
             }
           })
 
-          newCircles.sort((a, b) => b.gmv - a.gmv)
-          setCircles(newCircles)
-          localStorage.setItem('circles', JSON.stringify(newCircles))
+          const circlesToAdd: CircleData[] = [...newCircles, ...sameIdCircles]
 
-          const gmvValues = newCircles.map(circle => circle.gmv)
+          circlesToAdd.sort((a, b) => b.gmv - a.gmv)
+          setCircles(circlesToAdd)
+          localStorage.setItem('circles', JSON.stringify(circlesToAdd))
+
+          const gmvValues = circlesToAdd.map(circle => circle.gmv)
           setMinGMV(Math.min(...gmvValues))
           setMaxGMV(Math.max(...gmvValues))
         } catch (error) {
