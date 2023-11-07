@@ -189,7 +189,16 @@ const Map: React.FC = () => {
 
           const circlesToAdd: CircleData[] = [...newCircles, ...sameIdCircles]
 
-          circlesToAdd.sort((a, b) => b.gmv - a.gmv)
+          circlesToAdd.sort((a, b) => {
+            const gmvDifference = b.gmv - a.gmv
+
+            if (gmvDifference === 0) {
+              return a.name.localeCompare(b.name)
+            }
+
+            return gmvDifference
+          })
+
           setCircles(circlesToAdd)
           localStorage.setItem('circles', JSON.stringify(circlesToAdd))
 
