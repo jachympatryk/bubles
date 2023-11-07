@@ -135,65 +135,6 @@ const Map: React.FC = () => {
 
     return distance < totalRadii
   }
-  //
-  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files ? e.target.files[0] : null
-  //
-  //   if (file) {
-  //     const reader = new FileReader()
-  //     reader.onload = (e: any) => {
-  //       try {
-  //         const data = new Uint8Array(e.target.result)
-  //         const workbook = XLSX.read(data, { type: 'array' })
-  //         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-  //         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
-  //           raw: false,
-  //         })
-  //
-  //         const importedCircles: CircleData[] = json
-  //           .map(item => ({
-  //             lat: parseFloat(item.store_address_lat.replace(',', '.')),
-  //             lng: parseFloat(item.store_address_lon.replace(',', '.')),
-  //             radius: parseFloat(item.maximum_delivery_distance_meters),
-  //             gmv: parseFloat(item.gmv) || 0,
-  //             name: item.store_name,
-  //             storeId: parseInt(String(item.store_id)),
-  //             bubble:
-  //               item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
-  //             storeAddressId: parseInt(item.store_address_lat) || 0,
-  //             deliveryTime: parseInt(item.delivery_time) || 0,
-  //           }))
-  //           .sort((a, b) => b.gmv - a.gmv)
-  //
-  //         const newCircles = [...circles]
-  //         importedCircles.forEach(importedCircle => {
-  //           const intersectingCircles = newCircles.filter(newCircle =>
-  //             doCirclesIntersect(importedCircle, newCircle)
-  //           )
-  //           if (intersectingCircles.length < 6) {
-  //             newCircles.push(importedCircle)
-  //           }
-  //         })
-  //
-  //         newCircles.sort((a, b) => b.gmv - a.gmv)
-  //         setCircles(newCircles)
-  //         localStorage.setItem('circles', JSON.stringify(newCircles))
-  //
-  //         const gmvValues = importedCircles.map(circle => circle.gmv)
-  //         setMinGMV(Math.min(...gmvValues, minGMV))
-  //         setMaxGMV(Math.max(...gmvValues, maxGMV))
-  //       } catch (error) {
-  //         console.error('Wystąpił błąd podczas wczytywania pliku', error)
-  //       }
-  //     }
-  //
-  //     reader.readAsArrayBuffer(file)
-  //   }
-  //
-  //   if (fileInputExcelRef.current) {
-  //     fileInputExcelRef.current.value = ''
-  //   }
-  // }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null
@@ -238,6 +179,7 @@ const Map: React.FC = () => {
               const intersectingCircles: CircleData[] = newCircles.filter(
                 newCircle => doCirclesIntersect(importedCircle, newCircle)
               )
+
               if (intersectingCircles.length < 6) {
                 newCircles.push(importedCircle)
                 existingStoreIds.add(importedCircle.storeId)
