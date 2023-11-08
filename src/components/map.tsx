@@ -180,7 +180,7 @@ const Map: React.FC = () => {
                 newCircle => doCirclesIntersect(importedCircle, newCircle)
               )
 
-              if (intersectingCircles.length < 6) {
+              if (intersectingCircles.length < 4) {
                 newCircles.push(importedCircle)
                 existingStoreIds.add(importedCircle.storeId)
               }
@@ -357,13 +357,6 @@ const Map: React.FC = () => {
         exportCircles={exportCircles}
         setIsDataModal={setIsDataModal}
       />
-
-      {/*<Filters*/}
-      {/*  gmvFilter={gmvFilter}*/}
-      {/*  handleGmvFilterChange={handleGmvFilterChange}*/}
-      {/*  maxGMV={maxGMV}*/}
-      {/*  setGmvFilter={setGmvFilter}*/}
-      {/*/>*/}
 
       <Modal
         title="Dodaj okrąg"
