@@ -55,6 +55,7 @@ const Map: React.FC = () => {
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
   const [tempCircle, setTempCircle] = useState<CircleData | null>(null)
   const [gmvFilter] = useState<number>(0)
+  const [maxIntersections, setMaxIntersections] = useState<number>(4)
 
   const { theme } = useTheme()
 
@@ -180,7 +181,7 @@ const Map: React.FC = () => {
                 newCircle => doCirclesIntersect(importedCircle, newCircle)
               )
 
-              if (intersectingCircles.length < 4) {
+              if (intersectingCircles.length < maxIntersections) {
                 newCircles.push(importedCircle)
                 existingStoreIds.add(importedCircle.storeId)
               }
@@ -356,6 +357,8 @@ const Map: React.FC = () => {
         setIsModalOpen={setIsModalOpen}
         exportCircles={exportCircles}
         setIsDataModal={setIsDataModal}
+        setMaxIntersections={setMaxIntersections}
+        maxIntersections={maxIntersections}
       />
 
       <Modal

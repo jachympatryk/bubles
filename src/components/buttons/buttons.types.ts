@@ -9,4 +9,6 @@ export type ButtonsProps = {
   setIsInfoModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   exportCircles: () => void
   setIsDataModal: React.Dispatch<React.SetStateAction<boolean>>
+  setMaxIntersections: React.Dispatch<React.SetStateAction<number>>
+  maxIntersections: number
 }

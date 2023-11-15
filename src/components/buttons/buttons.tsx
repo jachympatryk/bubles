@@ -11,9 +11,25 @@ export const Buttons: React.FC<ButtonsProps> = ({
   circles,
   exportCircles,
   setIsDataModal,
+  setMaxIntersections,
+  maxIntersections,
 }) => {
+  const handleAddIntersections = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value)
+
+    setMaxIntersections(value)
+  }
+
   return (
     <div className={styles.bottomContainer}>
+      <input
+        id="intersections"
+        value={maxIntersections}
+        type="number"
+        onChange={handleAddIntersections}
+        className={styles.input}
+      />
+
       <input
         id="file-upload"
         type="file"
