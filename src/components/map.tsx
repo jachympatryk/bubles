@@ -116,6 +116,48 @@ const Map: React.FC = () => {
     return null
   }
 
+  const toRadians = (degree: number) => degree * (Math.PI / 180)
+
+  const calculateDistance = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ) => {
+    const earthRadius = 6371e3
+    const dLat = toRadians(lat2 - lat1)
+    const dLng = toRadians(lng2 - lng1)
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2)
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return earthRadius * c
+  }
+
+  const doCirclesOverlapOrContain = (
+    circle1: CircleData,
+    circle2: CircleData
+  ) => {
+    const distance = calculateDistance(
+      circle1.lat,
+      circle1.lng,
+      circle2.lat,
+      circle2.lng
+    )
+    const sumOfRadii = circle1.radius + circle2.radius
+    const radiusDifference = Math.abs(circle1.radius - circle2.radius)
+
+    const intersect = distance < sumOfRadii
+    const oneContainsTheOther = distance < radiusDifference
+
+    return { intersect, oneContainsTheOther }
+  }
+
   const doCirclesIntersect = (circle1: CircleData, circle2: CircleData) => {
     const lat1 = circle1.lat * (Math.PI / 180)
     const lat2 = circle2.lat * (Math.PI / 180)
@@ -173,15 +215,17 @@ const Map: React.FC = () => {
           )
 
           importedCircles.forEach(importedCircle => {
-            if (existingStoreIds.has(importedCircle.storeId)) {
-              sameIdCircles.push(importedCircle)
-              console.log(importedCircle)
-            } else {
-              const intersectingCircles: CircleData[] = newCircles.filter(
-                newCircle => doCirclesIntersect(importedCircle, newCircle)
-              )
+            if (!existingStoreIds.has(importedCircle.storeId)) {
+              let intersectionsOrContainments = 0
+              newCircles.forEach(newCircle => {
+                const { intersect, oneContainsTheOther } =
+                  doCirclesOverlapOrContain(importedCircle, newCircle)
+                if (intersect || oneContainsTheOther) {
+                  intersectionsOrContainments++
+                }
+              })
 
-              if (intersectingCircles.length < maxIntersections) {
+              if (intersectionsOrContainments < maxIntersections) {
                 newCircles.push(importedCircle)
                 existingStoreIds.add(importedCircle.storeId)
               }
