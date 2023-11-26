@@ -215,6 +215,9 @@ const Map: React.FC = () => {
           )
 
           importedCircles.forEach(importedCircle => {
+            if (existingStoreIds.has(importedCircle.storeId)) {
+              sameIdCircles.push(importedCircle)
+            }
             if (!existingStoreIds.has(importedCircle.storeId)) {
               let intersectionsOrContainments = 0
               newCircles.forEach(newCircle => {
