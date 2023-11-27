@@ -42,39 +42,6 @@ const MapEventHandler: React.FC<MapEventHandlerProps> = ({
   return null
 }
 
-const uniqueColors = [
-  '#FF5733',
-  '#33FF57',
-  '#3357FF',
-  '#FF33F5',
-  '#F5FF33',
-  '#33FFF5',
-  '#5733FF',
-  '#FF3357',
-  '#57FF33',
-  '#3357F5',
-  '#F533FF',
-  '#33F5FF',
-  '#FF5733',
-  '#5733F5',
-  '#F55733',
-  '#33FF57',
-  '#57F533',
-  '#3357FF',
-  '#5733FF',
-  '#F53357',
-  '#33F557',
-  '#FF3357',
-  '#FF5733',
-  '#57FF33',
-  '#F5FF33',
-  '#FF33F5',
-  '#33FFF5',
-  '#F5FF33',
-  '#33FF57',
-  '#57F5FF',
-]
-
 const Map: React.FC = () => {
   const fileInputExcelRef = useRef<HTMLInputElement>(null)
 
@@ -215,107 +182,6 @@ const Map: React.FC = () => {
     return distance < totalRadii
   }
 
-  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files ? e.target.files[0] : null
-  //
-  //   if (file) {
-  //     const reader = new FileReader()
-  //     reader.onload = (e: any) => {
-  //       try {
-  //         const data = new Uint8Array(e.target.result)
-  //         const workbook = XLSX.read(data, { type: 'array' })
-  //         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-  //         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
-  //           raw: false,
-  //         })
-  //
-  //         const importedCircles: CircleData[] = json
-  //           .map(item => ({
-  //             lat: parseFloat(item.store_address_lat.replace(',', '.')),
-  //             lng: parseFloat(item.store_address_lon.replace(',', '.')),
-  //             radius: parseFloat(item.maximum_delivery_distance_meters),
-  //             gmv: parseFloat(item.gmv) || 0,
-  //             name: item.store_name,
-  //             storeId: parseInt(String(item.store_id)),
-  //             bubble:
-  //               item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
-  //             storeAddressId: parseInt(item.store_address_id) || 0,
-  //             deliveryTime: parseInt(item.delivery_time) || 0,
-  //           }))
-  //           .sort((a, b) => b.gmv - a.gmv)
-  //
-  //         const newCircles: CircleData[] = [...circles]
-  //         const sameIdCircles: CircleData[] = []
-  //         const existingStoreIds = new Set<number>(
-  //           newCircles.map(c => c.storeId)
-  //         )
-  //
-  //         importedCircles.forEach(importedCircle => {
-  //           if (existingStoreIds.has(importedCircle.storeId)) {
-  //             sameIdCircles.push(importedCircle)
-  //           }
-  //           if (!existingStoreIds.has(importedCircle.storeId)) {
-  //             let intersectionsOrContainments = 0
-  //             newCircles.forEach(newCircle => {
-  //               const { intersect, oneContainsTheOther } =
-  //                 doCirclesOverlapOrContain(importedCircle, newCircle)
-  //               if (intersect || oneContainsTheOther) {
-  //                 intersectionsOrContainments++
-  //               }
-  //             })
-  //
-  //             if (intersectionsOrContainments < maxIntersections) {
-  //               newCircles.push(importedCircle)
-  //               existingStoreIds.add(importedCircle.storeId)
-  //             }
-  //           }
-  //         })
-  //
-  //         const circlesToAdd: CircleData[] = [...newCircles, ...sameIdCircles]
-  //
-  //         circlesToAdd.sort((a, b) => {
-  //           const gmvDifference = b.gmv - a.gmv
-  //
-  //           if (gmvDifference === 0) {
-  //             return a.name.localeCompare(b.name)
-  //           }
-  //
-  //           return gmvDifference
-  //         })
-  //
-  //         setCircles(circlesToAdd)
-  //         localStorage.setItem('circles', JSON.stringify(circlesToAdd))
-  //
-  //         const gmvValues = circlesToAdd.map(circle => circle.gmv)
-  //         setMinGMV(Math.min(...gmvValues))
-  //         setMaxGMV(Math.max(...gmvValues))
-  //       } catch (error) {
-  //         console.error('Wystąpił błąd podczas wczytywania pliku', error)
-  //       }
-  //     }
-  //
-  //     reader.readAsArrayBuffer(file)
-  //   }
-  //
-  //   if (fileInputExcelRef.current) {
-  //     fileInputExcelRef.current.value = ''
-  //   }
-  // }
-
-  const getColorForStoreId = (storeId: number) => {
-    if (!(storeId in storeIdToColorMap)) {
-      const color =
-        uniqueColors[
-          Object.keys(storeIdToColorMap).length % uniqueColors.length
-        ]
-      setStoreIdToColorMap(prevMap => ({
-        ...prevMap,
-        [storeId]: color,
-      }))
-    }
-    return storeIdToColorMap[storeId] || 'defaultColor' // Zwróć domyślny kolor jako zabezpieczenie
-  }
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null
 
@@ -368,7 +234,7 @@ const Map: React.FC = () => {
                 }
               })
 
-              if (intersectionsOrContainments >= maxIntersections) {
+              if (intersectionsOrContainments > maxIntersections) {
                 canAddCircle = false
                 break
               }
@@ -491,24 +357,6 @@ const Map: React.FC = () => {
   }
 
   useEffect(() => {
-    const newColorMap = { ...storeIdToColorMap }
-    let isColorMapUpdated = false
-
-    circles.forEach(circle => {
-      if (!(circle.storeId in newColorMap)) {
-        const color =
-          uniqueColors[Object.keys(newColorMap).length % uniqueColors.length]
-        newColorMap[circle.storeId] = color
-        isColorMapUpdated = true
-      }
-    })
-
-    if (isColorMapUpdated) {
-      setStoreIdToColorMap(newColorMap)
-    }
-  }, [circles])
-
-  useEffect(() => {
     if (isInfoModalOpen) {
       if (circles.length === 0) setIsInfoModalOpen(false)
     }
@@ -622,3 +470,90 @@ const Map: React.FC = () => {
 }
 
 export default Map
+
+// const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const file = e.target.files ? e.target.files[0] : null
+//
+//   if (file) {
+//     const reader = new FileReader()
+//     reader.onload = (e: any) => {
+//       try {
+//         const data = new Uint8Array(e.target.result)
+//         const workbook = XLSX.read(data, { type: 'array' })
+//         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+//         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
+//           raw: false,
+//         })
+//
+//         const importedCircles: CircleData[] = json
+//           .map(item => ({
+//             lat: parseFloat(item.store_address_lat.replace(',', '.')),
+//             lng: parseFloat(item.store_address_lon.replace(',', '.')),
+//             radius: parseFloat(item.maximum_delivery_distance_meters),
+//             gmv: parseFloat(item.gmv) || 0,
+//             name: item.store_name,
+//             storeId: parseInt(String(item.store_id)),
+//             bubble:
+//               item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
+//             storeAddressId: parseInt(item.store_address_id) || 0,
+//             deliveryTime: parseInt(item.delivery_time) || 0,
+//           }))
+//           .sort((a, b) => b.gmv - a.gmv)
+//
+//         const newCircles: CircleData[] = [...circles]
+//         const sameIdCircles: CircleData[] = []
+//         const existingStoreIds = new Set<number>(
+//           newCircles.map(c => c.storeId)
+//         )
+//
+//         importedCircles.forEach(importedCircle => {
+//           if (existingStoreIds.has(importedCircle.storeId)) {
+//             sameIdCircles.push(importedCircle)
+//           }
+//           if (!existingStoreIds.has(importedCircle.storeId)) {
+//             let intersectionsOrContainments = 0
+//             newCircles.forEach(newCircle => {
+//               const { intersect, oneContainsTheOther } =
+//                 doCirclesOverlapOrContain(importedCircle, newCircle)
+//               if (intersect || oneContainsTheOther) {
+//                 intersectionsOrContainments++
+//               }
+//             })
+//
+//             if (intersectionsOrContainments < maxIntersections) {
+//               newCircles.push(importedCircle)
+//               existingStoreIds.add(importedCircle.storeId)
+//             }
+//           }
+//         })
+//
+//         const circlesToAdd: CircleData[] = [...newCircles, ...sameIdCircles]
+//
+//         circlesToAdd.sort((a, b) => {
+//           const gmvDifference = b.gmv - a.gmv
+//
+//           if (gmvDifference === 0) {
+//             return a.name.localeCompare(b.name)
+//           }
+//
+//           return gmvDifference
+//         })
+//
+//         setCircles(circlesToAdd)
+//         localStorage.setItem('circles', JSON.stringify(circlesToAdd))
+//
+//         const gmvValues = circlesToAdd.map(circle => circle.gmv)
+//         setMinGMV(Math.min(...gmvValues))
+//         setMaxGMV(Math.max(...gmvValues))
+//       } catch (error) {
+//         console.error('Wystąpił błąd podczas wczytywania pliku', error)
+//       }
+//     }
+//
+//     reader.readAsArrayBuffer(file)
+//   }
+//
+//   if (fileInputExcelRef.current) {
+//     fileInputExcelRef.current.value = ''
+//   }
+// }
