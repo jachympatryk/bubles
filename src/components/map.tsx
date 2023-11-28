@@ -224,11 +224,16 @@ const Map: React.FC = () => {
               c => c.storeId === importedCircle.storeId
             )
 
+            const otherCircles = newCircles.filter(
+              c => c.storeId !== importedCircle.storeId
+            )
+
             for (let relatedCircle of relatedCircles) {
               let intersectionsOrContainments = 0
-              newCircles.forEach(newCircle => {
+
+              otherCircles.forEach(otherCircle => {
                 const { intersect, oneContainsTheOther } =
-                  doCirclesOverlapOrContain(relatedCircle, newCircle)
+                  doCirclesOverlapOrContain(relatedCircle, otherCircle)
                 if (intersect || oneContainsTheOther) {
                   intersectionsOrContainments++
                 }
