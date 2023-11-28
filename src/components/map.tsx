@@ -239,7 +239,7 @@ const Map: React.FC = () => {
                 }
               })
 
-              if (intersectionsOrContainments > maxIntersections - 1) {
+              if (intersectionsOrContainments > maxIntersections) {
                 canAddCircle = false
                 break
               }
