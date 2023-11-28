@@ -228,21 +228,22 @@ const Map: React.FC = () => {
               c => c.storeId !== importedCircle.storeId
             )
 
-            for (let relatedCircle of relatedCircles) {
-              let intersectionsOrContainments = 0
+            // Obliczanie warstw z uwzględnieniem grupowania po storeId
+            let totalIntersectionsOrContainments = 0
 
-              otherCircles.forEach(otherCircle => {
+            otherCircles.forEach(otherCircle => {
+              relatedCircles.forEach(relatedCircle => {
                 const { intersect, oneContainsTheOther } =
                   doCirclesOverlapOrContain(relatedCircle, otherCircle)
                 if (intersect || oneContainsTheOther) {
-                  intersectionsOrContainments++
+                  totalIntersectionsOrContainments++
                 }
               })
+            })
 
-              if (intersectionsOrContainments > maxIntersections) {
-                canAddCircle = false
-                break
-              }
+            // Sprawdzanie, czy liczba warstw nie przekracza maksymalnej wartości
+            if (totalIntersectionsOrContainments > maxIntersections) {
+              canAddCircle = false
             }
 
             if (canAddCircle) {
