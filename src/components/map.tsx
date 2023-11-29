@@ -149,11 +149,8 @@ const Map: React.FC = () => {
           const grid = createGrid(cityBounds, gridSize)
           const selectedRestaurants = selectRestaurants(importedCircles, grid)
 
-          // Update state and localStorage
           setCircles(selectedRestaurants)
           localStorage.setItem('circles', JSON.stringify(selectedRestaurants))
-
-          // Additional processing...
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
