@@ -15,7 +15,9 @@ import { CirclesList } from './circles-list/circles-list'
 import {
   CircleData,
   CircleForm,
+  CityBounds,
   ExcelData,
+  GridPoint,
   MapEventHandlerProps,
 } from './map.types'
 import { AddCircleForm } from './add-circle-form/add-circle-form'
@@ -23,6 +25,7 @@ import { Buttons } from './buttons/buttons'
 import DataAnalysis from './data-analysis/data-analysis'
 import { useTheme } from '../providers/theme-provider.provider'
 import { ThemeToggleButton } from './theme-toggle-button/theme-toggle-button'
+import { getDistance } from 'geolib'
 
 const poznanCoordinates: [number, number] = [52.409538, 16.931992]
 
@@ -119,153 +122,38 @@ const Map: React.FC = () => {
     return null
   }
 
-  const toRadians = (degree: number) => degree * (Math.PI / 180)
-
-  const calculateDistance = (
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number
-  ) => {
-    const earthRadius = 6371e3
-    const dLat = toRadians(lat2 - lat1)
-    const dLng = toRadians(lng2 - lng1)
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) *
-        Math.cos(toRadians(lat2)) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2)
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return earthRadius * c
-  }
-
-  const doCirclesOverlapOrContain = (
-    circle1: CircleData,
-    circle2: CircleData
-  ) => {
-    const distance = calculateDistance(
-      circle1.lat,
-      circle1.lng,
-      circle2.lat,
-      circle2.lng
-    )
-    const sumOfRadii = circle1.radius + circle2.radius
-    const radiusDifference = Math.abs(circle1.radius - circle2.radius)
-
-    const intersect = distance < sumOfRadii
-    const oneContainsTheOther = distance < radiusDifference
-
-    return { intersect, oneContainsTheOther }
-  }
-
-  const doCirclesIntersect = (circle1: CircleData, circle2: CircleData) => {
-    const lat1 = circle1.lat * (Math.PI / 180)
-    const lat2 = circle2.lat * (Math.PI / 180)
-    const lng1 = circle1.lng * (Math.PI / 180)
-    const lng2 = circle2.lng * (Math.PI / 180)
-
-    const earthRadius = 6371e3
-    const dLat = lat2 - lat1
-    const dLng = lng2 - lng1
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-    const distance = earthRadius * c
-    const totalRadii = circle1.radius + circle2.radius
-
-    return distance < totalRadii
-  }
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null
 
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e: any) => {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
-          const data = new Uint8Array(e.target.result)
+          const data = new Uint8Array(e.target?.result as ArrayBuffer)
           const workbook = XLSX.read(data, { type: 'array' })
           const worksheet = workbook.Sheets[workbook.SheetNames[0]]
           const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
             raw: false,
           })
 
-          const importedCircles: CircleData[] = json
-            .map(item => ({
-              lat: parseFloat(item.store_address_lat.replace(',', '.')),
-              lng: parseFloat(item.store_address_lon.replace(',', '.')),
-              radius: parseFloat(item.maximum_delivery_distance_meters),
-              gmv: parseFloat(item.gmv) || 0,
-              name: item.store_name,
-              storeId: parseInt(String(item.store_id)),
-              bubble:
-                item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
-              storeAddressId: parseInt(item.store_address_id) || 0,
-              deliveryTime: parseInt(item.delivery_time) || 0,
-            }))
-            .sort((a, b) => b.gmv - a.gmv)
+          const importedCircles = processExcelData(json)
 
-          let newCircles: CircleData[] = [...circles]
-          let circlesToExclude = new Set<number>()
+          const cityBounds: CityBounds = {
+            latMin: 52.38,
+            latMax: 52.46,
+            lonMin: 16.92,
+            lonMax: 16.96,
+          }
+          const gridSize = 0.01 // Approx 1 km grid
 
-          importedCircles.forEach(importedCircle => {
-            if (circlesToExclude.has(importedCircle.storeId)) {
-              return
-            }
+          const grid = createGrid(cityBounds, gridSize)
+          const selectedRestaurants = selectRestaurants(importedCircles, grid)
 
-            let canAddCircle = true
-            const relatedCircles = importedCircles.filter(
-              c => c.storeId === importedCircle.storeId
-            )
+          // Update state and localStorage
+          setCircles(selectedRestaurants)
+          localStorage.setItem('circles', JSON.stringify(selectedRestaurants))
 
-            const otherCircles = newCircles.filter(
-              c => c.storeId !== importedCircle.storeId
-            )
-
-            // Obliczanie warstw z uwzględnieniem grupowania po storeId
-            let totalIntersectionsOrContainments = 0
-
-            otherCircles.forEach(otherCircle => {
-              relatedCircles.forEach(relatedCircle => {
-                const { intersect, oneContainsTheOther } =
-                  doCirclesOverlapOrContain(relatedCircle, otherCircle)
-                if (intersect || oneContainsTheOther) {
-                  totalIntersectionsOrContainments++
-                }
-              })
-            })
-
-            // Sprawdzanie, czy liczba warstw nie przekracza maksymalnej wartości
-            if (totalIntersectionsOrContainments > maxIntersections) {
-              canAddCircle = false
-            }
-
-            if (canAddCircle) {
-              relatedCircles.forEach(c => newCircles.push(c))
-            } else {
-              circlesToExclude.add(importedCircle.storeId)
-            }
-          })
-
-          newCircles.sort((a, b) => {
-            const gmvDifference = b.gmv - a.gmv
-            return gmvDifference === 0
-              ? a.name.localeCompare(b.name)
-              : gmvDifference
-          })
-
-          setCircles(newCircles)
-          localStorage.setItem('circles', JSON.stringify(newCircles))
-
-          const gmvValues = newCircles.map(circle => circle.gmv)
-          setMinGMV(Math.min(...gmvValues))
-          setMaxGMV(Math.max(...gmvValues))
+          // Additional processing...
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
@@ -279,6 +167,70 @@ const Map: React.FC = () => {
     }
   }
 
+  const processExcelData = (json: ExcelData[]): CircleData[] => {
+    return json
+      .map(item => ({
+        lat: parseFloat(item.store_address_lat.replace(',', '.')),
+        lng: parseFloat(item.store_address_lon.replace(',', '.')),
+        radius: parseFloat(item.maximum_delivery_distance_meters),
+        gmv: parseFloat(item.gmv) || 0,
+        name: item.store_name,
+        storeId: parseInt(String(item.store_id)),
+        bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
+        storeAddressId: parseInt(String(item.store_address_id)) || 0,
+        deliveryTime: parseInt(String(item.delivery_time)) || 0,
+      }))
+      .sort((a, b) => b.gmv - a.gmv)
+  }
+
+  const createGrid = (
+    cityBounds: CityBounds,
+    gridSize: number
+  ): GridPoint[] => {
+    let grid: GridPoint[] = []
+    for (
+      let lat = cityBounds.latMin;
+      lat < cityBounds.latMax;
+      lat += gridSize
+    ) {
+      for (
+        let lon = cityBounds.lonMin;
+        lon < cityBounds.lonMax;
+        lon += gridSize
+      ) {
+        grid.push({ latitude: lat, longitude: lon })
+      }
+    }
+    return grid
+  }
+
+  const isWithinRadius = (
+    restaurant: CircleData,
+    point: GridPoint
+  ): boolean => {
+    return (
+      getDistance(
+        { latitude: restaurant.lat, longitude: restaurant.lng },
+        point
+      ) <= restaurant.radius
+    )
+  }
+
+  const selectRestaurants = (
+    restaurants: CircleData[],
+    grid: GridPoint[]
+  ): CircleData[] => {
+    let selectedRestaurants = new Set<CircleData>()
+    grid.forEach(point => {
+      let coveredRestaurants = restaurants.filter(restaurant =>
+        isWithinRadius(restaurant, point)
+      )
+      coveredRestaurants
+        .slice(0, maxIntersections)
+        .forEach(rest => selectedRestaurants.add(rest))
+    })
+    return Array.from(selectedRestaurants)
+  }
   const handleAddCircle = (values: CircleForm) => {
     const newCircle: CircleData = {
       lat: tempCircle ? tempCircle.lat : parseFloat(values.lat),
@@ -293,7 +245,7 @@ const Map: React.FC = () => {
     }
 
     const newCircles = [...circles, newCircle]
-    newCircles.sort((a, b) => b.gmv - a.gmv) // Sortowanie od najwyższego do najniższego GMV
+    newCircles.sort((a, b) => b.gmv - a.gmv)
     setCircles(newCircles)
     localStorage.setItem('circles', JSON.stringify(newCircles))
 
@@ -344,22 +296,6 @@ const Map: React.FC = () => {
       setMinGMV(Infinity)
       setMaxGMV(-Infinity)
     }
-  }
-
-  const generateColor = (storeId: number) => {
-    let hash = 0
-    const storeIdString = storeId.toString()
-    for (let i = 0; i < storeIdString.length; i++) {
-      hash = storeIdString.charCodeAt(i) + ((hash << 5) - hash)
-    }
-
-    let color = '#'
-    for (let i = 0; i < 3; i++) {
-      const value = (hash >> (i * 8)) & 0xff
-      color += ('00' + value.toString(16)).substr(-2)
-    }
-
-    return color
   }
 
   useEffect(() => {
@@ -476,90 +412,3 @@ const Map: React.FC = () => {
 }
 
 export default Map
-
-// const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-//   const file = e.target.files ? e.target.files[0] : null
-//
-//   if (file) {
-//     const reader = new FileReader()
-//     reader.onload = (e: any) => {
-//       try {
-//         const data = new Uint8Array(e.target.result)
-//         const workbook = XLSX.read(data, { type: 'array' })
-//         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-//         const json: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
-//           raw: false,
-//         })
-//
-//         const importedCircles: CircleData[] = json
-//           .map(item => ({
-//             lat: parseFloat(item.store_address_lat.replace(',', '.')),
-//             lng: parseFloat(item.store_address_lon.replace(',', '.')),
-//             radius: parseFloat(item.maximum_delivery_distance_meters),
-//             gmv: parseFloat(item.gmv) || 0,
-//             name: item.store_name,
-//             storeId: parseInt(String(item.store_id)),
-//             bubble:
-//               item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || true,
-//             storeAddressId: parseInt(item.store_address_id) || 0,
-//             deliveryTime: parseInt(item.delivery_time) || 0,
-//           }))
-//           .sort((a, b) => b.gmv - a.gmv)
-//
-//         const newCircles: CircleData[] = [...circles]
-//         const sameIdCircles: CircleData[] = []
-//         const existingStoreIds = new Set<number>(
-//           newCircles.map(c => c.storeId)
-//         )
-//
-//         importedCircles.forEach(importedCircle => {
-//           if (existingStoreIds.has(importedCircle.storeId)) {
-//             sameIdCircles.push(importedCircle)
-//           }
-//           if (!existingStoreIds.has(importedCircle.storeId)) {
-//             let intersectionsOrContainments = 0
-//             newCircles.forEach(newCircle => {
-//               const { intersect, oneContainsTheOther } =
-//                 doCirclesOverlapOrContain(importedCircle, newCircle)
-//               if (intersect || oneContainsTheOther) {
-//                 intersectionsOrContainments++
-//               }
-//             })
-//
-//             if (intersectionsOrContainments < maxIntersections) {
-//               newCircles.push(importedCircle)
-//               existingStoreIds.add(importedCircle.storeId)
-//             }
-//           }
-//         })
-//
-//         const circlesToAdd: CircleData[] = [...newCircles, ...sameIdCircles]
-//
-//         circlesToAdd.sort((a, b) => {
-//           const gmvDifference = b.gmv - a.gmv
-//
-//           if (gmvDifference === 0) {
-//             return a.name.localeCompare(b.name)
-//           }
-//
-//           return gmvDifference
-//         })
-//
-//         setCircles(circlesToAdd)
-//         localStorage.setItem('circles', JSON.stringify(circlesToAdd))
-//
-//         const gmvValues = circlesToAdd.map(circle => circle.gmv)
-//         setMinGMV(Math.min(...gmvValues))
-//         setMaxGMV(Math.max(...gmvValues))
-//       } catch (error) {
-//         console.error('Wystąpił błąd podczas wczytywania pliku', error)
-//       }
-//     }
-//
-//     reader.readAsArrayBuffer(file)
-//   }
-//
-//   if (fileInputExcelRef.current) {
-//     fileInputExcelRef.current.value = ''
-//   }
-// }

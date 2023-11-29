@@ -37,3 +37,15 @@ export interface ExcelData {
 export interface MapEventHandlerProps {
   handleMapClick: (event: LeafletMouseEvent) => void
 }
+
+export interface GridPoint {
+  latitude: number
+  longitude: number
+}
+
+export interface CityBounds {
+  latMin: number
+  latMax: number
+  lonMin: number
+  lonMax: number
+}
