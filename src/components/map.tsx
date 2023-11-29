@@ -144,9 +144,10 @@ const Map: React.FC = () => {
             lonMin: 16.92,
             lonMax: 16.96,
           }
+
           const gridSize = 0.01 // Approx 1 km grid
 
-          const grid = createGrid(cityBounds, gridSize)
+          const grid: GridPoint[] = createGrid(cityBounds, gridSize)
           const selectedRestaurants = selectRestaurants(importedCircles, grid)
 
           setCircles(selectedRestaurants)
@@ -173,18 +174,17 @@ const Map: React.FC = () => {
         gmv: parseFloat(item.gmv) || 0,
         name: item.store_name,
         storeId: parseInt(String(item.store_id)),
-        bubble: item.bubble === 'PRAWDA' || item.bubble === 'TRUE',
+        bubble:
+          item.bubble === 'PRAWDA' || item.bubble === 'TRUE' || !item.bubble,
+        // true,
         storeAddressId: parseInt(String(item.store_address_id)) || 0,
         deliveryTime: parseInt(String(item.delivery_time)) || 0,
       }))
       .sort((a, b) => b.gmv - a.gmv)
   }
 
-  const createGrid = (
-    cityBounds: CityBounds,
-    gridSize: number
-  ): GridPoint[] => {
-    let grid: GridPoint[] = []
+  function createGrid(cityBounds: CityBounds, gridSize: number): GridPoint[] {
+    const grid = []
     for (
       let lat = cityBounds.latMin;
       lat < cityBounds.latMax;
@@ -201,33 +201,48 @@ const Map: React.FC = () => {
     return grid
   }
 
-  const isWithinRadius = (
-    restaurant: CircleData,
-    point: GridPoint
-  ): boolean => {
-    return (
-      getDistance(
-        { latitude: restaurant.lat, longitude: restaurant.lng },
-        point
-      ) <= restaurant.radius
-    )
+  const isWithinRadius = (restaurant: CircleData, point: GridPoint) => {
+    const restaurantLocation = {
+      latitude: restaurant.lat,
+      longitude: restaurant.lng,
+    }
+    const pointLocation = {
+      latitude: point.latitude,
+      longitude: point.longitude,
+    }
+
+    return getDistance(restaurantLocation, pointLocation) <= restaurant.radius
   }
 
-  const selectRestaurants = (
-    restaurants: CircleData[],
-    grid: GridPoint[]
-  ): CircleData[] => {
-    let selectedRestaurants = new Set<CircleData>()
+  function selectRestaurants(restaurants: CircleData[], grid: GridPoint[]) {
+    let selectedRestaurants: CircleData[] = []
+
     grid.forEach(point => {
       let coveredRestaurants = restaurants.filter(restaurant =>
-        isWithinRadius(restaurant, point)
+        isWithinRadius(restaurant, {
+          latitude: point.latitude,
+          longitude: point.longitude,
+        })
       )
-      coveredRestaurants
-        .slice(0, maxIntersections)
-        .forEach(rest => selectedRestaurants.add(rest))
+
+      coveredRestaurants.sort((a, b) => b.gmv - a.gmv)
+
+      coveredRestaurants = coveredRestaurants.slice(0, maxIntersections)
+
+      coveredRestaurants.forEach(restaurant => {
+        if (
+          !selectedRestaurants.some(
+            selected => selected.storeId === restaurant.storeId
+          )
+        ) {
+          selectedRestaurants.push(restaurant)
+        }
+      })
     })
-    return Array.from(selectedRestaurants)
+
+    return selectedRestaurants
   }
+
   const handleAddCircle = (values: CircleForm) => {
     const newCircle: CircleData = {
       lat: tempCircle ? tempCircle.lat : parseFloat(values.lat),
