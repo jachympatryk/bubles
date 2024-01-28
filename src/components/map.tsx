@@ -154,6 +154,12 @@ const Map: React.FC = () => {
           // localStorage.setItem('circles', JSON.stringify(selectedRestaurants))
           setCircles(importedCircles)
           localStorage.setItem('circles', JSON.stringify(importedCircles))
+
+          // update minGMV and maxGMV based on imported data
+          const gmvValues = importedCircles.map(circle => circle.gmv);
+          setMinGMV(Math.min(...gmvValues));
+          setMaxGMV(Math.max(...gmvValues));
+
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
@@ -359,7 +365,11 @@ const Map: React.FC = () => {
                 <Circle
                   center={[circle.lat, circle.lng]}
                   radius={circle.radius}
-                  pathOptions={{ color: circleColor }}
+                  pathOptions={{
+                    color: circleColor,
+                    fillColor: circleColor,
+                    fillOpacity: 0.15, // Adjust the opacity to your preference
+                  }}
                 >
                   <Tooltip permanent>
                     {circle.name}, {circle.gmv}
