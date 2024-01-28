@@ -22,13 +22,13 @@ export const Buttons: React.FC<ButtonsProps> = ({
 
   return (
     <div className={styles.bottomContainer}>
-      <input
+      {/* <input
         id="intersections"
         value={maxIntersections}
         type="number"
         onChange={handleAddIntersections}
         className={styles.input}
-      />
+      /> */}
 
       <input
         id="file-upload"

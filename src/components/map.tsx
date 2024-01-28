@@ -57,7 +57,7 @@ const Map: React.FC = () => {
     useState<[number, number]>(poznanCoordinates)
   const [isDataModal, setIsDataModal] = useState<boolean>(false)
   const [tempCircle, setTempCircle] = useState<CircleData | null>(null)
-  const [gmvFilter] = useState<number>(0)
+  // const [gmvFilter] = useState<number>(0)
   const [maxIntersections, setMaxIntersections] = useState<number>(4)
   const [storeIdToColorMap, setStoreIdToColorMap] = useState<{
     [storeId: number]: string
@@ -147,11 +147,13 @@ const Map: React.FC = () => {
 
           const gridSize = 0.01 // Approx 1 km grid
 
-          const grid: GridPoint[] = createGrid(cityBounds, gridSize)
-          const selectedRestaurants = selectRestaurants(importedCircles, grid)
+          // const grid: GridPoint[] = createGrid(cityBounds, gridSize)
+          // const selectedRestaurants = selectRestaurants(importedCircles, grid)
 
-          setCircles(selectedRestaurants)
-          localStorage.setItem('circles', JSON.stringify(selectedRestaurants))
+          // setCircles(selectedRestaurants)
+          // localStorage.setItem('circles', JSON.stringify(selectedRestaurants))
+          setCircles(importedCircles)
+          localStorage.setItem('circles', JSON.stringify(importedCircles))
         } catch (error) {
           console.error('Wystąpił błąd podczas wczytywania pliku', error)
         }
@@ -180,7 +182,7 @@ const Map: React.FC = () => {
         storeAddressId: parseInt(String(item.store_address_id)) || 0,
         deliveryTime: parseInt(String(item.delivery_time)) || 0,
       }))
-      .sort((a, b) => b.gmv - a.gmv)
+    // .sort((a, b) => b.gmv - a.gmv)
   }
 
   function createGrid(cityBounds: CityBounds, gridSize: number): GridPoint[] {
@@ -201,47 +203,47 @@ const Map: React.FC = () => {
     return grid
   }
 
-  const isWithinRadius = (restaurant: CircleData, point: GridPoint) => {
-    const restaurantLocation = {
-      latitude: restaurant.lat,
-      longitude: restaurant.lng,
-    }
-    const pointLocation = {
-      latitude: point.latitude,
-      longitude: point.longitude,
-    }
+  // const isWithinRadius = (restaurant: CircleData, point: GridPoint) => {
+  //   const restaurantLocation = {
+  //     latitude: restaurant.lat,
+  //     longitude: restaurant.lng,
+  //   }
+  //   const pointLocation = {
+  //     latitude: point.latitude,
+  //     longitude: point.longitude,
+  //   }
 
-    return getDistance(restaurantLocation, pointLocation) <= restaurant.radius
-  }
+  //   return getDistance(restaurantLocation, pointLocation) <= restaurant.radius
+  // }
 
-  function selectRestaurants(restaurants: CircleData[], grid: GridPoint[]) {
-    let selectedRestaurants: CircleData[] = []
+  // function selectRestaurants(restaurants: CircleData[], grid: GridPoint[]) {
+  //   let selectedRestaurants: CircleData[] = []
 
-    grid.forEach(point => {
-      let coveredRestaurants = restaurants.filter(restaurant =>
-        isWithinRadius(restaurant, {
-          latitude: point.latitude,
-          longitude: point.longitude,
-        })
-      )
+  //   grid.forEach(point => {
+  //     let coveredRestaurants = restaurants.filter(restaurant =>
+  //       isWithinRadius(restaurant, {
+  //         latitude: point.latitude,
+  //         longitude: point.longitude,
+  //       })
+  //     )
 
-      coveredRestaurants.sort((a, b) => b.gmv - a.gmv)
+  //     coveredRestaurants.sort((a, b) => b.gmv - a.gmv)
 
-      coveredRestaurants = coveredRestaurants.slice(0, maxIntersections)
+  //     coveredRestaurants = coveredRestaurants.slice(0, maxIntersections)
 
-      coveredRestaurants.forEach(restaurant => {
-        if (
-          !selectedRestaurants.some(
-            selected => selected.storeId === restaurant.storeId
-          )
-        ) {
-          selectedRestaurants.push(restaurant)
-        }
-      })
-    })
+  //     coveredRestaurants.forEach(restaurant => {
+  //       if (
+  //         !selectedRestaurants.some(
+  //           selected => selected.storeId === restaurant.storeId
+  //         )
+  //       ) {
+  //         selectedRestaurants.push(restaurant)
+  //       }
+  //     })
+  //   })
 
-    return selectedRestaurants
-  }
+  //   return selectedRestaurants
+  // }
 
   const handleAddCircle = (values: CircleForm) => {
     const newCircle: CircleData = {
@@ -257,7 +259,7 @@ const Map: React.FC = () => {
     }
 
     const newCircles = [...circles, newCircle]
-    newCircles.sort((a, b) => b.gmv - a.gmv)
+    // newCircles.sort((a, b) => b.gmv - a.gmv)
     setCircles(newCircles)
     localStorage.setItem('circles', JSON.stringify(newCircles))
 
@@ -347,7 +349,7 @@ const Map: React.FC = () => {
         <MapEventHandler handleMapClick={handleMapClick} />
 
         {circles
-          .filter(circle => circle.gmv >= gmvFilter)
+          // .filter(circle => circle.gmv >= gmvFilter)
           .map((circle, idx) => {
             if (!circle.bubble) return null
 
